@@ -17,8 +17,8 @@ func NewServer(inputFolder string, outputFolder string) *Server {
 }
 
 func (server *Server) Run(endpoint string) {
-	server.gin.POST("/api/convert/video", server.converVideo)
-	server.gin.POST("/api/convert/image", server.converVideo)
+	server.gin.POST("/api/convert/video", server.convertVideo)
+	server.gin.POST("/api/convert/image", server.convertImage)
 
 	server.gin.Run(endpoint)
 }
