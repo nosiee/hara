@@ -3,15 +3,15 @@ package api
 import "github.com/gin-gonic/gin"
 
 type Server struct {
-	inputFolder  string
-	outputFolder string
-	gin          *gin.Engine
+	inputPath  string
+	outputPath string
+	gin        *gin.Engine
 }
 
-func NewServer(inputFolder string, outputFolder string) *Server {
+func NewServer(inputPath string, outputPath string) *Server {
 	return &Server{
-		inputFolder,
-		outputFolder,
+		inputPath,
+		outputPath,
 		gin.New(),
 	}
 }
