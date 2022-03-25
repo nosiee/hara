@@ -1,18 +1,24 @@
 package api
 
-import "github.com/gin-gonic/gin"
+import (
+	"hara/internal/convert"
+
+	"github.com/gin-gonic/gin"
+)
 
 type Server struct {
+	gin        *gin.Engine
+	converter  *convert.Converter
 	inputPath  string
 	outputPath string
-	gin        *gin.Engine
 }
 
-func NewServer(inputPath string, outputPath string) *Server {
+func NewServer(inputPath, outputPath string, converter *convert.Converter) *Server {
 	return &Server{
+		gin.New(),
+		converter,
 		inputPath,
 		outputPath,
-		gin.New(),
 	}
 }
 

@@ -29,15 +29,15 @@ func (server *Server) convertVideo(ctx *gin.Context) {
 	}
 
 	fpath := fmt.Sprintf("%s/%s", server.inputPath, file.Filename)
+	opath := fmt.Sprintf("%s/%s", server.outputPath, options.Output.Name)
 	ctx.SaveUploadedFile(file, fpath)
 
-	out, err := convert.ConvertVideo(fpath, server.outputPath, &options)
-	if err != nil {
+	if err := server.converter.ConvertVideo(fpath, opath, options); err != nil {
 		server.sendError(ctx, 500, err.Error())
 		return
 	}
 
-	ctx.String(200, out)
+	ctx.String(200, "OK")
 }
 
 func (sever *Server) convertImage(ctx *gin.Context) {

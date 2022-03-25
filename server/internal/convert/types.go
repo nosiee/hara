@@ -11,17 +11,17 @@ type InputVideoOptions struct {
 }
 
 type OutputVideoOptions struct {
-	Name          string `json:"name"`
-	VideoBitrate  string `json:"video-bitrate"`
-	AudioBitrate  string `json:"audio-bitrate"`
-	AudioCodec    string `json:"audio-codec"`
-	VideoCodec    string `json:"video-codec"`
-	AudioChannels string `json:"channels"`
-	SampleRate    string `json:"sample-rate"`
-	Volume        string `json:"volume"`
-	Resolution    string `json:"resolution"`
-	AspectRatio   string `json:"aspect-ratio"`
-	FPS           string `json:"fps"`
-	TrimStart     string `json:"trim-start"`
-	TrimEnd       string `json:"trim-end"`
+	Name         string `json:"name,omitempty"`
+	Extension    string `json:"extension"`
+	VideoBitRate string `json:"videoBitRate,omitempty"`
+	AudioBitRate string `json:"audioBitRate,omitempty"`
+	AudioCodec   string `json:"audioCodec,omitempty"`
+	VideoCodec   string `json:"videoCodec,omitempty"`
+	Channels     int    `json:"channels,omitempty"`
+	Volume       string `json:"volume,omitempty"`
+	Resolution   string `json:"resolution,omitempty"`
+	AspectRatio  string `json:"aspectRatio,omitempty"`
+	FrameRate    int    `json:"frameRate,omitempty"`
+	TrimStart    string `json:"trimStart,omitempty"`
+	TrimEnd      string `json:"trimEnd,omitempty"`
 }
