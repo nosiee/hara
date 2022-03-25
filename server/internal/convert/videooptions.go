@@ -22,6 +22,5 @@ func (opt VideoOptionsMap) CallFunc(key string, m *models.Mediafile, value any) 
 		opt[key].(func(*models.Mediafile, uint))(m, value.(uint))
 	case bool:
 		opt[key].(func(*models.Mediafile, bool))(m, value.(bool))
-
 	}
 }
