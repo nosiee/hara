@@ -15,7 +15,7 @@ type Converter struct {
 func NewConverter() *Converter {
 	return &Converter{
 		new(transcoder.Transcoder),
-		make(VideoOptionsMap, 33),
+		make(VideoOptionsMap, 28),
 	}
 }
 
@@ -60,6 +60,9 @@ func (conv *Converter) ConvertVideo(inputPath, outputPath string, options Conver
 		fname := o.Type().Field(i).Name
 		fvalue := o.Field(i).Interface()
 
+		// TODO: Actually we process all fields including default values.
+		// If for a string field it's pretty ez to check the value. For int, uint and bool it's not.
+		// Find a way to do that.
 		conv.vopt.CallFunc(fname, conv.tcoder.MediaFile(), fvalue)
 	}
 
