@@ -66,8 +66,6 @@ func (conv *Converter) ConvertVideo(ifile string, options ConversionVideoOptions
 		fname := o.Type().Field(i).Name
 		fvalue := o.Field(i).Interface()
 
-		// NOTE: (vc_default_fiels) Default values for integer and boolean fields have no effect on conversion
-		// So we can pass them to the as arguments.
 		conv.vopt.CallFunc(fname, conv.tcoder.MediaFile(), fvalue)
 	}
 

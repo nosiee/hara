@@ -15,16 +15,24 @@ func (opt VideoOptionsMap) CallFunc(key string, m *models.Mediafile, value any) 
 
 	switch value.(type) {
 	case string:
-		// NOTE: (vc_default_fields) But it will be better if we skip empty strings.
 		if len(value.(string)) == 0 {
 			break
 		}
 		opt[key].(func(*models.Mediafile, string))(m, value.(string))
 	case int:
+		if value.(int) == 0 {
+			break
+		}
 		opt[key].(func(*models.Mediafile, int))(m, value.(int))
 	case uint:
+		if value.(uint) == 0 {
+			break
+		}
 		opt[key].(func(*models.Mediafile, uint))(m, value.(uint))
 	case bool:
+		if !value.(bool) {
+			break
+		}
 		opt[key].(func(*models.Mediafile, bool))(m, value.(bool))
 	}
 }

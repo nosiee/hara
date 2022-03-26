@@ -38,6 +38,7 @@ func (server *Server) convertVideo(ctx *gin.Context) {
 	}
 
 	// TODO: Remove input file
+	// Generate temp link to a converted file and pass it
 	ctx.String(200, "OK")
 }
 
@@ -71,5 +72,6 @@ func (server *Server) convertImage(ctx *gin.Context) {
 	}
 
 	// TODO: Remove input file
+	// Generate temp link to a converted file and pass it
 	ctx.String(200, "OK")
 }

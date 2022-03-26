@@ -21,6 +21,8 @@ func NewServer(inputPath string, converter *convert.Converter) *Server {
 }
 
 func (server *Server) Run(endpoint string) {
+	// TODO: It will be cool if we make a middleware for filtering input files
+	// For example: the video api should only accept the video file format.
 	server.gin.POST("/api/convert/video", server.convertVideo)
 	server.gin.POST("/api/convert/image", server.convertImage)
 
