@@ -6,6 +6,7 @@ import (
 
 	"github.com/xfrr/goffmpeg/models"
 	"github.com/xfrr/goffmpeg/transcoder"
+	"gopkg.in/gographics/imagick.v3/imagick"
 )
 
 type Converter struct {
@@ -53,22 +54,49 @@ func (conv *Converter) Initialize() {
 	conv.vopt.AddFunc("CompressionLevel", (*models.Mediafile).SetCompressionLevel)
 }
 
-func (conv *Converter) ConvertVideo(inputPath string, options ConversionVideoOptions) error {
-	outputPath := fmt.Sprintf("%s/%s", conv.outputPath, options.Output.Name)
-	if err := conv.tcoder.Initialize(inputPath, outputPath); err != nil {
+func (conv *Converter) ConvertVideo(ifile string, options ConversionVideoOptions) error {
+	// TODO: check options.Name and if it's empty, use output as output file name
+	ofile := fmt.Sprintf("%s/%s", conv.outputPath, options.Name)
+	if err := conv.tcoder.Initialize(ifile, ofile); err != nil {
 		return err
 	}
 
-	o := reflect.ValueOf(options.Output)
+	o := reflect.ValueOf(options)
 	for i := 0; i < o.NumField(); i++ {
 		fname := o.Type().Field(i).Name
 		fvalue := o.Field(i).Interface()
 
-		// NOTE: (vc_default_fiels): Default values for integer and boolean fields have no effect on conversion
+		// NOTE: (vc_default_fiels) Default values for integer and boolean fields have no effect on conversion
 		// So we can pass them to the as arguments.
 		conv.vopt.CallFunc(fname, conv.tcoder.MediaFile(), fvalue)
 	}
 
 	done := conv.tcoder.Run(false)
 	return <-done
+}
+
+func (conv *Converter) ConvertImage(ifile string, options ConversionImageOptions) error {
+	var err error
+
+	imagick.Initialize()
+	defer imagick.Terminate()
+
+	mw := imagick.NewMagickWand()
+	if err = mw.ReadImage(ifile); err != nil {
+		return err
+	}
+
+	if err = mw.ResizeImage(options.Width, options.Height, imagick.FILTER_LANCZOS); err != nil {
+		return err
+	}
+
+	if err = mw.SetImageCompressionQuality(options.Quality); err != nil {
+		return err
+	}
+
+	// TODO: check options.Name and if it's empty, use output as output file name
+	ofile := fmt.Sprintf("%s/%s", conv.outputPath, options.Name)
+	mw.WriteImage(ofile)
+
+	return nil
 }

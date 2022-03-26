@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	// TODO: Separate folders for video input/output and image input/output
 	converter := convert.NewConverter("output")
 	converter.Initialize()
 

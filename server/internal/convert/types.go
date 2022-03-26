@@ -1,16 +1,14 @@
 package convert
 
+type ConversionImageOptions struct {
+	Name       string `json:"name"`
+	Extensions string `json:"extension"`
+	Width      uint   `json:"width"`
+	Height     uint   `json:"height"`
+	Quality    uint   `json:"quality"`
+}
+
 type ConversionVideoOptions struct {
-	Type   string             `json:"type"`
-	Input  InputVideoOptions  `json:"input"`
-	Output OutputVideoOptions `json:"output"`
-}
-
-type InputVideoOptions struct {
-	Extension string `json:"extension"`
-}
-
-type OutputVideoOptions struct {
 	Name             string `json:"name"`
 	Extension        string `json:"extension"`
 	AspectRatio      string `json:"aspectRatio"`

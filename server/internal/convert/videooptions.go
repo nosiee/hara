@@ -15,7 +15,7 @@ func (opt VideoOptionsMap) CallFunc(key string, m *models.Mediafile, value any) 
 
 	switch value.(type) {
 	case string:
-		// NOTE: (vc_default_fields): But it will be better if we skip empty strings.
+		// NOTE: (vc_default_fields) But it will be better if we skip empty strings.
 		if len(value.(string)) == 0 {
 			break
 		}
