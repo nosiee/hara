@@ -55,8 +55,8 @@ func (conv *Converter) Initialize() {
 }
 
 func (conv *Converter) ConvertVideo(ifile string, options ConversionVideoOptions) error {
-	// TODO: check options.Name and if it's empty, use output as output file name
 	ofile := fmt.Sprintf("%s/%s", conv.outputPath, options.Name)
+
 	if err := conv.tcoder.Initialize(ifile, ofile); err != nil {
 		return err
 	}
@@ -73,28 +73,29 @@ func (conv *Converter) ConvertVideo(ifile string, options ConversionVideoOptions
 	return <-done
 }
 
-func (conv *Converter) ConvertImage(ifile string, options ConversionImageOptions) error {
-	var err error
-
+func (conv *Converter) ConvertImage(ifile string, options ConversionImageOptions) (err error) {
 	imagick.Initialize()
 	defer imagick.Terminate()
 
 	mw := imagick.NewMagickWand()
 	if err = mw.ReadImage(ifile); err != nil {
-		return err
+		return
 	}
 
-	if err = mw.ResizeImage(options.Width, options.Height, imagick.FILTER_LANCZOS); err != nil {
-		return err
+	if options.Width != 0 && options.Height != 0 {
+		if err = mw.ResizeImage(options.Width, options.Height, imagick.FILTER_LANCZOS); err != nil {
+			return
+		}
 	}
 
-	if err = mw.SetImageCompressionQuality(options.Quality); err != nil {
-		return err
+	if options.Quality != 0 {
+		if err = mw.SetImageCompressionQuality(options.Quality); err != nil {
+			return
+		}
 	}
 
-	// TODO: check options.Name and if it's empty, use output as output file name
 	ofile := fmt.Sprintf("%s/%s", conv.outputPath, options.Name)
 	mw.WriteImage(ofile)
 
-	return nil
+	return
 }
