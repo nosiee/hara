@@ -1,6 +1,7 @@
 package convert
 
 import (
+	"fmt"
 	"reflect"
 
 	"github.com/xfrr/goffmpeg/models"
@@ -8,14 +9,16 @@ import (
 )
 
 type Converter struct {
-	tcoder *transcoder.Transcoder
-	vopt   VideoOptionsMap
+	tcoder     *transcoder.Transcoder
+	vopt       VideoOptionsMap
+	outputPath string
 }
 
-func NewConverter() *Converter {
+func NewConverter(outputPath string) *Converter {
 	return &Converter{
 		new(transcoder.Transcoder),
 		make(VideoOptionsMap, 28),
+		outputPath,
 	}
 }
 
@@ -50,7 +53,8 @@ func (conv *Converter) Initialize() {
 	conv.vopt.AddFunc("CompressionLevel", (*models.Mediafile).SetCompressionLevel)
 }
 
-func (conv *Converter) ConvertVideo(inputPath, outputPath string, options ConversionVideoOptions) error {
+func (conv *Converter) ConvertVideo(inputPath string, options ConversionVideoOptions) error {
+	outputPath := fmt.Sprintf("%s/%s", conv.outputPath, options.Output.Name)
 	if err := conv.tcoder.Initialize(inputPath, outputPath); err != nil {
 		return err
 	}
@@ -60,9 +64,8 @@ func (conv *Converter) ConvertVideo(inputPath, outputPath string, options Conver
 		fname := o.Type().Field(i).Name
 		fvalue := o.Field(i).Interface()
 
-		// TODO: Actually we process all fields including default values.
-		// If for a string field it's pretty ez to check the value. For int, uint and bool it's not.
-		// Find a way to do that.
+		// NOTE: (vc_default_fiels): Default values for integer and boolean fields have no effect on conversion
+		// So we can pass them to the as arguments.
 		conv.vopt.CallFunc(fname, conv.tcoder.MediaFile(), fvalue)
 	}
 

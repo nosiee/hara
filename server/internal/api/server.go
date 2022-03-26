@@ -7,18 +7,16 @@ import (
 )
 
 type Server struct {
-	gin        *gin.Engine
-	converter  *convert.Converter
-	inputPath  string
-	outputPath string
+	gin       *gin.Engine
+	converter *convert.Converter
+	inputPath string
 }
 
-func NewServer(inputPath, outputPath string, converter *convert.Converter) *Server {
+func NewServer(inputPath string, converter *convert.Converter) *Server {
 	return &Server{
 		gin.New(),
 		converter,
 		inputPath,
-		outputPath,
 	}
 }
 
