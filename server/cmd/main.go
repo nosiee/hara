@@ -16,8 +16,8 @@ func main() {
 
 		config.LoadFromFile(confFile)
 	} else {
-		config.LoadFromEnv("API_ENDPOINT", "UPLOAD_VIDEO_PATH", "UPLOAD_IMAGE_PATH", "OUTPUT_VIDEO_PATH", "OUTPUT_IMAGE_PATH")
+		config.LoadFromEnv()
 	}
 
-	api.RunServer(config.APIEndPoint)
+	api.RunServer(config.Values.APIEndPoint)
 }

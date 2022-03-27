@@ -15,7 +15,7 @@ func ImageController(ctx *gin.Context) {
 
 	iopt := ioptIface.(convert.ConversionImageOptions)
 	file := fileIface.(*multipart.FileHeader)
-	fpath := fmt.Sprintf("%s/%s", config.UploadImagePath, file.Filename)
+	fpath := fmt.Sprintf("%s/%s", config.Values.UploadImagePath, file.Filename)
 
 	ctx.SaveUploadedFile(file, fpath)
 

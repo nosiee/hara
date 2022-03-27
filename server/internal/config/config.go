@@ -1,47 +1,26 @@
 package config
 
 import (
-	"os"
-
 	"github.com/BurntSushi/toml"
+	"github.com/kelseyhightower/envconfig"
 )
 
-var (
-	APIEndPoint     string
-	UploadVideoPath string
-	UploadImagePath string
-	OutputVideoPath string
-	OutputImagePath string
-)
-
-type config struct {
-	APIEndPoint     string
-	UploadVideoPath string
-	UploadImagePath string
-	OutputVideoPath string
-	OutputImagePath string
+type values struct {
+	APIEndPoint     string `envconfig:"API_ENDPOINT" required:"true"`
+	UploadImagePath string `envconfig:"UPLOAD_IMAGE_PATH" required:"true"`
+	UploadVideoPath string `envconfig:"UPLOAD_VIDEO_PATH" required:"true"`
+	OutputImagePath string `envconfig:"OUTPUT_IMAGE_PATH" required:"true"`
+	OutputVideoPath string `envconfig:"OUTPUT_VIDEO_PATH" required:"true"`
 }
 
-func LoadFromEnv(apiEnv, uplVidEnv, uplImgEnv, outVidEnv, outImgEnv string) error {
-	// TODO: check for empty variables
-	APIEndPoint = os.Getenv(apiEnv)
-	UploadImagePath = os.Getenv(uplImgEnv)
-	UploadVideoPath = os.Getenv(uplVidEnv)
-	OutputImagePath = os.Getenv(outImgEnv)
-	OutputVideoPath = os.Getenv(outVidEnv)
+var Values values
 
-	return nil
+func LoadFromEnv() error {
+	err := envconfig.Process("", &Values)
+	return err
 }
 
 func LoadFromFile(fpath string) error {
-	var conf config
-	_, err := toml.DecodeFile(fpath, &conf)
-
-	APIEndPoint = conf.APIEndPoint
-	UploadImagePath = conf.UploadImagePath
-	UploadVideoPath = conf.UploadVideoPath
-	OutputImagePath = conf.OutputImagePath
-	OutputVideoPath = conf.OutputVideoPath
-
+	_, err := toml.DecodeFile(fpath, &Values)
 	return err
 }

@@ -47,7 +47,7 @@ func init() {
 }
 
 func ConvertVideo(ifile string, options ConversionVideoOptions) error {
-	ofile := fmt.Sprintf("%s/%s", config.OutputVideoPath, options.Name)
+	ofile := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, options.Name)
 
 	if err := tscoder.Initialize(ifile, ofile); err != nil {
 		return err
@@ -86,7 +86,7 @@ func ConvertImage(ifile string, options ConversionImageOptions) (err error) {
 		}
 	}
 
-	ofile := fmt.Sprintf("%s/%s", config.OutputImagePath, options.Name)
+	ofile := fmt.Sprintf("%s/%s", config.Values.OutputImagePath, options.Name)
 	mw.WriteImage(ofile)
 
 	return

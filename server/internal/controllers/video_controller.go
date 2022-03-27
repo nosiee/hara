@@ -15,7 +15,7 @@ func VideoController(ctx *gin.Context) {
 
 	vopt := voptIface.(convert.ConversionVideoOptions)
 	file := fileIface.(*multipart.FileHeader)
-	fpath := fmt.Sprintf("%s/%s", config.UploadVideoPath, file.Filename)
+	fpath := fmt.Sprintf("%s/%s", config.Values.UploadVideoPath, file.Filename)
 
 	ctx.SaveUploadedFile(file, fpath)
 

@@ -1,6 +1,7 @@
 # -- Folders
-server/input
+server/upload
 server/output
+configs
 
 # -- Files
-
+*.out
