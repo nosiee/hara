@@ -7,21 +7,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Server struct {
-	gin       *gin.Engine
-	inputPath string
-}
+var (
+	gen = gin.New()
+)
 
-func NewServer(inputPath string) Server {
-	return Server{
-		gin.New(),
-		inputPath,
-	}
-}
+func RunServer(endpoint string) {
+	gen.POST("/api/convert/video", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateVideoOptionsJson, middleware.SupportedVideoFileFormat, controllers.VideoController)
+	gen.POST("/api/convert/image", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateImageOptionsJson, middleware.SupportedImageFileFormat, controllers.ImageController)
 
-func (server Server) Run(endpoint string) {
-	server.gin.POST("/api/convert/video", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateVideoOptionsJson, middleware.SupportedVideoFileFormat, controllers.VideoController)
-	server.gin.POST("/api/convert/image", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateImageOptionsJson, middleware.SupportedImageFileFormat, controllers.ImageController)
-
-	server.gin.Run(endpoint)
+	gen.Run(endpoint)
 }

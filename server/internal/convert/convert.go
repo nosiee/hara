@@ -2,6 +2,7 @@ package convert
 
 import (
 	"fmt"
+	"hara/internal/config"
 	"reflect"
 
 	"github.com/xfrr/goffmpeg/models"
@@ -46,8 +47,7 @@ func init() {
 }
 
 func ConvertVideo(ifile string, options ConversionVideoOptions) error {
-	// TODO: load outputpath from config(?)
-	ofile := fmt.Sprintf("%s/%s", "output", options.Name)
+	ofile := fmt.Sprintf("%s/%s", config.OutputVideoPath, options.Name)
 
 	if err := tscoder.Initialize(ifile, ofile); err != nil {
 		return err
@@ -86,8 +86,7 @@ func ConvertImage(ifile string, options ConversionImageOptions) (err error) {
 		}
 	}
 
-	// TODO: load outputpath from config(?)
-	ofile := fmt.Sprintf("%s/%s", "output", options.Name)
+	ofile := fmt.Sprintf("%s/%s", config.OutputImagePath, options.Name)
 	mw.WriteImage(ofile)
 
 	return

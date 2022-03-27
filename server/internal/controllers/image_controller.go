@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"hara/internal/config"
 	"hara/internal/convert"
 	"mime/multipart"
 
@@ -14,14 +15,14 @@ func ImageController(ctx *gin.Context) {
 
 	iopt := ioptIface.(convert.ConversionImageOptions)
 	file := fileIface.(*multipart.FileHeader)
-	fpath := fmt.Sprintf("input/%s", file.Filename)
+	fpath := fmt.Sprintf("%s/%s", config.UploadImagePath, file.Filename)
 
-	// TODO: load input folder from config(?)
 	ctx.SaveUploadedFile(file, fpath)
 
 	if err := convert.ConvertImage(fpath, iopt); err != nil {
-		fmt.Println(err)
-		ctx.String(400, "NOT OK")
+		ctx.JSON(400, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
