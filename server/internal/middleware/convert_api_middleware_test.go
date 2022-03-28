@@ -14,6 +14,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type requestCase struct {
+	request *http.Request
+	correct bool
+	name    string
+}
+
+type contextCase struct {
+	context any
+	correct bool
+	name    string
+}
+
+func init() {
+	gin.SetMode(gin.TestMode)
+}
+
 func createFormRequest(formField, formValue string) *http.Request {
 	form := url.Values{}
 	form.Add(formField, formValue)
@@ -37,12 +53,50 @@ func createFileFormRequest(formField, formValue string) *http.Request {
 	return req
 }
 
+func testFieldProvided(t *testing.T, c requestCase, f func(*gin.Context)) *gin.Context {
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+	ctx.Request = c.request
+
+	f(ctx)
+
+	if c.correct && rec.Code != 200 {
+		t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
+	}
+
+	if !c.correct && rec.Code == 200 {
+		t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
+	}
+
+	return ctx
+}
+
+func testSupportedFileFormat(t *testing.T, c contextCase, f func(*gin.Context)) {
+	rec := httptest.NewRecorder()
+	ctx, _ := gin.CreateTestContext(rec)
+
+	switch c.context.(type) {
+	case convert.ConversionImageOptions:
+		ctx.Set("imageOptions", c.context.(convert.ConversionImageOptions))
+		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionImageOptions).Name})
+	case convert.ConversionVideoOptions:
+		ctx.Set("videoOptions", c.context.(convert.ConversionVideoOptions))
+		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionVideoOptions).Name})
+	}
+
+	f(ctx)
+
+	if c.correct && rec.Code != 200 {
+		t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
+	}
+
+	if !c.correct && rec.Code == 200 {
+		t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
+	}
+}
+
 func TestOptionsFieldProvided(t *testing.T) {
-	testCases := []struct {
-		request *http.Request
-		correct bool
-		name    string
-	}{
+	testCases := []requestCase{
 		{
 			createFormRequest("options", "{value}"),
 			true,
@@ -57,29 +111,13 @@ func TestOptionsFieldProvided(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			rec := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(rec)
-			ctx.Request = c.request
-
-			OptionsFieldProvided(ctx)
-
-			if c.correct && rec.Code != 200 {
-				t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
-
-			if !c.correct && rec.Code == 200 {
-				t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
+			testFieldProvided(t, c, OptionsFieldProvided)
 		})
 	}
 }
 
 func TestFileFieldProvided(t *testing.T) {
-	testCases := []struct {
-		request *http.Request
-		correct bool
-		name    string
-	}{
+	testCases := []requestCase{
 		{
 			createFileFormRequest("file", "1.mp4"),
 			true,
@@ -94,19 +132,7 @@ func TestFileFieldProvided(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			rec := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(rec)
-			ctx.Request = c.request
-
-			FileFieldProvided(ctx)
-
-			if c.correct && rec.Code != 200 {
-				t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
-
-			if !c.correct && rec.Code == 200 {
-				t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
+			testFieldProvided(t, c, FileFieldProvided)
 		})
 	}
 }
@@ -115,11 +141,7 @@ func TestValidateVideoOptionsJson(t *testing.T) {
 	var options convert.ConversionVideoOptions
 	optionsJson, _ := json.Marshal(options)
 
-	testCases := []struct {
-		request *http.Request
-		correct bool
-		name    string
-	}{
+	testCases := []requestCase{
 		{
 			createFormRequest("options", string(optionsJson)),
 			true,
@@ -134,19 +156,7 @@ func TestValidateVideoOptionsJson(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			rec := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(rec)
-			ctx.Request = c.request
-
-			ValidateVideoOptionsJson(ctx)
-
-			if c.correct && rec.Code != 200 {
-				t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
-
-			if !c.correct && rec.Code == 200 {
-				t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
+			ctx := testFieldProvided(t, c, ValidateVideoOptionsJson)
 
 			got, ok := ctx.Get("videoOptions")
 			if !ok {
@@ -164,11 +174,7 @@ func TestValidateImageOptionsJson(t *testing.T) {
 	var options convert.ConversionImageOptions
 	optionsJson, _ := json.Marshal(options)
 
-	testCases := []struct {
-		request *http.Request
-		correct bool
-		name    string
-	}{
+	testCases := []requestCase{
 		{
 			createFormRequest("options", string(optionsJson)),
 			true,
@@ -183,19 +189,7 @@ func TestValidateImageOptionsJson(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			rec := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(rec)
-			ctx.Request = c.request
-
-			ValidateImageOptionsJson(ctx)
-
-			if c.correct && rec.Code != 200 {
-				t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
-
-			if !c.correct && rec.Code == 200 {
-				t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
+			ctx := testFieldProvided(t, c, ValidateImageOptionsJson)
 
 			got, ok := ctx.Get("imageOptions")
 			if !ok {
@@ -213,15 +207,14 @@ func TestSupportedVideoFileFormat(t *testing.T) {
 	correctVideoFormat := convert.ConversionVideoOptions{Name: "1.mp4"}
 	incorrectVideoFormat := convert.ConversionVideoOptions{Name: "1.exe"}
 
-	testCases := []struct {
-		correct bool
-		name    string
-	}{
+	testCases := []contextCase{
 		{
+			correctVideoFormat,
 			true,
 			"CorrectVideoFormat",
 		},
 		{
+			incorrectVideoFormat,
 			false,
 			"IncorrectVideoFormat",
 		},
@@ -229,26 +222,7 @@ func TestSupportedVideoFileFormat(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			rec := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(rec)
-
-			if c.correct {
-				ctx.Set("videoOptions", correctVideoFormat)
-				ctx.Set("file", &multipart.FileHeader{Filename: correctVideoFormat.Name})
-			} else {
-				ctx.Set("videoOptions", incorrectVideoFormat)
-				ctx.Set("file", &multipart.FileHeader{Filename: incorrectVideoFormat.Name})
-			}
-
-			SupportedVideoFileFormat(ctx)
-
-			if c.correct && rec.Code != 200 {
-				t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
-
-			if !c.correct && rec.Code == 200 {
-				t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
+			testSupportedFileFormat(t, c, SupportedVideoFileFormat)
 		})
 	}
 }
@@ -257,15 +231,14 @@ func TestSupportedImageFileFormat(t *testing.T) {
 	correctImageFormat := convert.ConversionImageOptions{Name: "1.jpg"}
 	incorrectImageFormat := convert.ConversionImageOptions{Name: "1.exe"}
 
-	testCases := []struct {
-		correct bool
-		name    string
-	}{
+	testCases := []contextCase{
 		{
+			correctImageFormat,
 			true,
 			"CorrectImageFormat",
 		},
 		{
+			incorrectImageFormat,
 			false,
 			"IncorrectImageFormat",
 		},
@@ -273,26 +246,7 @@ func TestSupportedImageFileFormat(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			rec := httptest.NewRecorder()
-			ctx, _ := gin.CreateTestContext(rec)
-
-			if c.correct {
-				ctx.Set("imageOptions", correctImageFormat)
-				ctx.Set("file", &multipart.FileHeader{Filename: correctImageFormat.Name})
-			} else {
-				ctx.Set("imageOptions", incorrectImageFormat)
-				ctx.Set("file", &multipart.FileHeader{Filename: incorrectImageFormat.Name})
-			}
-
-			SupportedImageFileFormat(ctx)
-
-			if c.correct && rec.Code != 200 {
-				t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
-
-			if !c.correct && rec.Code == 200 {
-				t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-			}
+			testSupportedFileFormat(t, c, SupportedImageFileFormat)
 		})
 	}
 }
