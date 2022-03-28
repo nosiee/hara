@@ -56,7 +56,7 @@ func ValidateImageOptionsJson(ctx *gin.Context) {
 }
 
 func SupportedVideoFileFormat(ctx *gin.Context) {
-	var supportedFilePattern = "^\\w+.(3g2|3gp|3gpp|avi|cavs|dv|dvr|flv|m2ts|m4v|mkv|mod|mov|mp4|mpeg|mpg|mts|mxf|ogg|rm|webm|wmv)$"
+	var supportedFilePattern = "(3g2|3gp|3gpp|avi|cavs|dv|dvr|flv|m2ts|m4v|mkv|mod|mov|mp4|mpeg|mpg|mts|mxf|ogg|rm|webm|wmv)$"
 	supportedFileRegexp, _ := regexp.Compile(supportedFilePattern)
 	vopt, _ := ctx.Get("videoOptions")
 	f, _ := ctx.Get("file")
@@ -67,7 +67,7 @@ func SupportedVideoFileFormat(ctx *gin.Context) {
 		})
 	}
 
-	if !supportedFileRegexp.MatchString(vopt.(convert.ConversionVideoOptions).Name) {
+	if !supportedFileRegexp.MatchString(vopt.(convert.ConversionVideoOptions).Extension) {
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})
@@ -75,7 +75,7 @@ func SupportedVideoFileFormat(ctx *gin.Context) {
 }
 
 func SupportedImageFileFormat(ctx *gin.Context) {
-	var supportedFilePattern = "^\\w+.(jpg|jpeg|png|webp|gif|ico|bmp)$"
+	var supportedFilePattern = "(jpg|jpeg|png|webp|gif|ico|bmp)$"
 	supportedFileRegexp, _ := regexp.Compile(supportedFilePattern)
 	iopt, _ := ctx.Get("imageOptions")
 	f, _ := ctx.Get("file")
@@ -86,7 +86,7 @@ func SupportedImageFileFormat(ctx *gin.Context) {
 		})
 	}
 
-	if !supportedFileRegexp.MatchString(iopt.(convert.ConversionImageOptions).Name) {
+	if !supportedFileRegexp.MatchString(iopt.(convert.ConversionImageOptions).Extension) {
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})

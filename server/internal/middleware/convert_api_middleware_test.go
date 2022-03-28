@@ -78,10 +78,10 @@ func testSupportedFileFormat(t *testing.T, c contextCase, f func(*gin.Context)) 
 	switch c.context.(type) {
 	case convert.ConversionImageOptions:
 		ctx.Set("imageOptions", c.context.(convert.ConversionImageOptions))
-		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionImageOptions).Name})
+		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionImageOptions).Extension})
 	case convert.ConversionVideoOptions:
 		ctx.Set("videoOptions", c.context.(convert.ConversionVideoOptions))
-		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionVideoOptions).Name})
+		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionVideoOptions).Extension})
 	}
 
 	f(ctx)
@@ -204,8 +204,8 @@ func TestValidateImageOptionsJson(t *testing.T) {
 }
 
 func TestSupportedVideoFileFormat(t *testing.T) {
-	correctVideoFormat := convert.ConversionVideoOptions{Name: "1.mp4"}
-	incorrectVideoFormat := convert.ConversionVideoOptions{Name: "1.exe"}
+	correctVideoFormat := convert.ConversionVideoOptions{Extension: "mp4"}
+	incorrectVideoFormat := convert.ConversionVideoOptions{Extension: "exe"}
 
 	testCases := []contextCase{
 		{
@@ -228,8 +228,8 @@ func TestSupportedVideoFileFormat(t *testing.T) {
 }
 
 func TestSupportedImageFileFormat(t *testing.T) {
-	correctImageFormat := convert.ConversionImageOptions{Name: "1.jpg"}
-	incorrectImageFormat := convert.ConversionImageOptions{Name: "1.exe"}
+	correctImageFormat := convert.ConversionImageOptions{Extension: "jpg"}
+	incorrectImageFormat := convert.ConversionImageOptions{Extension: "exe"}
 
 	testCases := []contextCase{
 		{

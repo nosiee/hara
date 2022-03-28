@@ -19,13 +19,13 @@ func VideoController(ctx *gin.Context) {
 
 	ctx.SaveUploadedFile(file, fpath)
 
-	if err := convert.ConvertVideo(fpath, vopt); err != nil {
+	ofile, err := convert.ConvertVideo(fpath, vopt)
+	if err != nil {
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	// TODO: generate temporary link to the converted file
-	ctx.String(200, "OK")
+	ctx.String(200, fmt.Sprintf("http://localhost:8080/api/v/%s", ofile))
 }

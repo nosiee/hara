@@ -19,13 +19,13 @@ func ImageController(ctx *gin.Context) {
 
 	ctx.SaveUploadedFile(file, fpath)
 
-	if err := convert.ConvertImage(fpath, iopt); err != nil {
+	ofile, err := convert.ConvertImage(fpath, iopt)
+	if err != nil {
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	// TODO: generate temporary link to the converted file
-	ctx.String(200, "OK")
+	ctx.String(200, fmt.Sprintf("http://localhost:8080/api/i/%s", ofile))
 }

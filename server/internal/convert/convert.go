@@ -1,6 +1,8 @@
 package convert
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"hara/internal/config"
 	"reflect"
@@ -46,11 +48,12 @@ func init() {
 	vopt.AddFunc("CompressionLevel", (*models.Mediafile).SetCompressionLevel)
 }
 
-func ConvertVideo(ifile string, options ConversionVideoOptions) error {
-	ofile := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, options.Name)
+func ConvertVideo(ifile string, options ConversionVideoOptions) (ofilename string, err error) {
+	ofilename = fmt.Sprintf("%s.%s", getRandomFileName(), options.Extension)
+	ofilepath := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, ofilename)
 
-	if err := tscoder.Initialize(ifile, ofile); err != nil {
-		return err
+	if err = tscoder.Initialize(ifile, ofilepath); err != nil {
+		return
 	}
 
 	o := reflect.ValueOf(options)
@@ -62,10 +65,15 @@ func ConvertVideo(ifile string, options ConversionVideoOptions) error {
 	}
 
 	done := tscoder.Run(false)
-	return <-done
+	err = <-done
+
+	return
 }
 
-func ConvertImage(ifile string, options ConversionImageOptions) (err error) {
+func ConvertImage(ifile string, options ConversionImageOptions) (ofilename string, err error) {
+	ofilename = fmt.Sprintf("%s.%s", getRandomFileName(), options.Extension)
+	ofilepath := fmt.Sprintf("%s/%s", config.Values.OutputImagePath, ofilename)
+
 	imagick.Initialize()
 	defer imagick.Terminate()
 
@@ -86,8 +94,16 @@ func ConvertImage(ifile string, options ConversionImageOptions) (err error) {
 		}
 	}
 
-	ofile := fmt.Sprintf("%s/%s", config.Values.OutputImagePath, options.Name)
-	mw.WriteImage(ofile)
-
+	mw.WriteImage(ofilepath)
 	return
+}
+
+func getRandomFileName() string {
+	u := make([]byte, 32)
+	_, _ = rand.Read(u)
+
+	u[8] = (u[8] | 0x80) & 0xBF
+	u[6] = (u[6] | 0x40) & 0x4F
+
+	return hex.EncodeToString(u)
 }
