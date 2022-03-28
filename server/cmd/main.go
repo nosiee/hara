@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"hara/internal/api"
 	"hara/internal/config"
+	"hara/internal/db"
 	"os"
 )
 
@@ -17,6 +19,11 @@ func main() {
 		config.LoadFromFile(confFile)
 	} else {
 		config.LoadFromEnv()
+	}
+
+	if err := db.Connnect(config.Values.DatabaseURL); err != nil {
+		fmt.Println(err)
+		os.Exit(-1)
 	}
 
 	api.RunServer(config.Values.APIEndPoint)

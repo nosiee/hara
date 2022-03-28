@@ -2,6 +2,7 @@ package convert
 
 type ConversionImageOptions struct {
 	Extension string `json:"extension"`
+	Lifetime  uint   `json:"lifetime"`
 	Width     uint   `json:"width"`
 	Height    uint   `json:"height"`
 	Quality   uint   `json:"quality"`
@@ -9,6 +10,7 @@ type ConversionImageOptions struct {
 
 type ConversionVideoOptions struct {
 	Extension        string `json:"extension"`
+	Lifetime         uint   `json:"lifetime"`
 	AspectRatio      string `json:"aspectRatio"`
 	Resolution       string `json:"resolution"`
 	VideoBitRate     string `json:"videoBitRate"`

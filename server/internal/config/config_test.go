@@ -6,12 +6,13 @@ import (
 )
 
 func TestLoadFromEnv(t *testing.T) {
-	correctEnvs := make(map[string]string, 5)
+	correctEnvs := make(map[string]string, 6)
 	correctEnvs["API_ENDPOINT"] = ":8080"
 	correctEnvs["UPLOAD_IMAGE_PATH"] = "upload/images"
 	correctEnvs["UPLOAD_VIDEO_PATH"] = "upload/videos"
 	correctEnvs["OUTPUT_IMAGE_PATH"] = "output/images"
 	correctEnvs["OUTPUT_VIDEO_PATH"] = "output/videos"
+	correctEnvs["DATABASE_URL"] = "postgresql://localhost/mydb?user=other&password=secret"
 
 	incorrectEnvs := make(map[string]string, 1)
 	incorrectEnvs["API_ENDPOINT"] = ":8080"

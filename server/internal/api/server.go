@@ -24,16 +24,12 @@ func RunServer(endpoint string) {
 func testImage(c *gin.Context) {
 	fpath := fmt.Sprintf("output/images/%s", c.Param("filename"))
 
-	fmt.Println(fpath)
-
 	c.Header("Content-Type", "image/jpg")
 	c.File(fpath)
 }
 
 func testVideo(c *gin.Context) {
 	fpath := fmt.Sprintf("output/videos/%s", c.Param("filename"))
-
-	fmt.Println(fpath)
 
 	c.Header("Content-Type", "video/webm")
 	c.File(fpath)

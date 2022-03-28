@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"hara/internal/config"
 	"hara/internal/convert"
+	"hara/internal/db"
 	"mime/multipart"
 
 	"github.com/gin-gonic/gin"
@@ -26,6 +27,10 @@ func ImageController(ctx *gin.Context) {
 		})
 		return
 	}
+
+	db.AddFileLifetime(ofile, iopt.Lifetime)
+	// url := GenerateFileUrl(ctx, ofile)
+	// os.Remove(fpath)
 
 	ctx.String(200, fmt.Sprintf("http://localhost:8080/api/i/%s", ofile))
 }
