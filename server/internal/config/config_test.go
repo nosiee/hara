@@ -17,19 +17,19 @@ func TestLoadFromEnv(t *testing.T) {
 	incorrectEnvs["API_ENDPOINT"] = ":8080"
 
 	testCases := []struct {
-		envVars  map[string]string
-		correct  bool
-		caseName string
+		envVars map[string]string
+		correct bool
+		name    string
 	}{
 		{
 			correctEnvs,
 			true,
-			"CurrectCaseEnv",
+			"CurrectEnv",
 		},
 		{
 			incorrectEnvs,
 			false,
-			"IncorrectCaseEnv",
+			"IncorrectEnv",
 		},
 	}
 
@@ -40,16 +40,16 @@ func TestLoadFromEnv(t *testing.T) {
 
 		err := LoadFromEnv()
 
-		for k, _ := range c.envVars {
+		for k := range c.envVars {
 			os.Unsetenv(k)
 		}
 
 		if c.correct && err != nil {
-			t.Fatalf("%s: want err == nil, got %s", c.caseName, err)
+			t.Fatalf("%s: want err == nil, got %s", c.name, err)
 		}
 
 		if !c.correct && err == nil {
-			t.Fatalf("%s: want err != nil, got nil", c.caseName)
+			t.Fatalf("%s: want err != nil, got nil", c.name)
 		}
 	}
 
@@ -57,32 +57,32 @@ func TestLoadFromEnv(t *testing.T) {
 
 func TestLoadFromFile(t *testing.T) {
 	testCases := []struct {
-		fpath    string
-		correct  bool
-		caseName string
+		fpath   string
+		correct bool
+		name    string
 	}{
 		{
 			"testconfigs/config_test_correct.toml",
 			true,
-			"CorrectCaseFile",
+			"CorrectFile",
 		},
 		{
 			"testconfigs/config_test_incorrect.toml",
 			false,
-			"IncorrectCaseFile",
+			"IncorrectFile",
 		},
 	}
 
 	for _, c := range testCases {
-		t.Run(c.caseName, func(t *testing.T) {
+		t.Run(c.name, func(t *testing.T) {
 			err := LoadFromFile(c.fpath)
 
 			if c.correct && err != nil {
-				t.Fatalf("%s: want err == nil, got %v", c.caseName, err)
+				t.Fatalf("%s: want err == nil, got %v", c.name, err)
 			}
 
 			if !c.correct && err == nil {
-				t.Fatalf("%s: want err != nil, got nil", c.caseName)
+				t.Fatalf("%s: want err != nil, got nil", c.name)
 			}
 		})
 	}
