@@ -20,9 +20,12 @@ func Connnect(url string) error {
 		return err
 	}
 
+	go deleteExpiredFilesTicker()
+
 	return nil
 }
 
-func AddFileLifetime(fpath string, lifetime uint) {
-	println("OK")
+func Close() {
+	closeTicker <- struct{}{}
+	db.Close()
 }

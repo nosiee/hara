@@ -14,8 +14,8 @@ type ConversionVideoOptions struct {
 	AspectRatio      string `json:"aspectRatio"`
 	Resolution       string `json:"resolution"`
 	VideoBitRate     string `json:"videoBitRate"`
-	VideoMaxBitRate  int    `json:"setVideoMaxBitRate"`
-	VideoMinBitRate  int    `json:"setVideoMinBitRate"`
+	VideoMaxBitRate  int    `json:"videoMaxBitRate"`
+	VideoMinBitRate  int    `json:"videoMinBitRate"`
 	VideoCodec       string `json:"videoCodec"`
 	VFrames          int    `json:"vFrames"`
 	FrameRate        int    `json:"frameRate"`

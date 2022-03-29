@@ -6,6 +6,8 @@ import (
 	"hara/internal/convert"
 	"hara/internal/db"
 	"mime/multipart"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,9 +30,15 @@ func ImageController(ctx *gin.Context) {
 		return
 	}
 
-	db.AddFileLifetime(ofile, iopt.Lifetime)
-	// url := GenerateFileUrl(ctx, ofile)
-	// os.Remove(fpath)
+	// TODO: valudate lifetime
+	os.Remove(fpath)
+	deleteDate := time.Now().Add(time.Duration(iopt.Lifetime) * time.Second)
+	if err = db.AddFileLifetime(ofile, "image", deleteDate.Format(time.RFC3339)); err != nil {
+		ctx.JSON(500, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
 
-	ctx.String(200, fmt.Sprintf("http://localhost:8080/api/i/%s", ofile))
+	ctx.String(200, GenerateFileUrl(ctx, "i", ofile))
 }

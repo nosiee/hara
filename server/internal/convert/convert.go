@@ -99,11 +99,11 @@ func ConvertImage(ifile string, options ConversionImageOptions) (ofilename strin
 }
 
 func getRandomFileName() string {
-	u := make([]byte, 32)
+	u := make([]byte, 8)
 	_, _ = rand.Read(u)
 
-	u[8] = (u[8] | 0x80) & 0xBF
-	u[6] = (u[6] | 0x40) & 0x4F
+	u[7] = (u[7] | 0x80) & 0xBF
+	u[5] = (u[5] | 0x40) & 0x4F
 
 	return hex.EncodeToString(u)
 }
