@@ -30,7 +30,7 @@ func VideoController(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: valudate lifetime
+	// TODO: validate lifetime
 	os.Remove(fpath)
 	deleteDate := time.Now().Add(time.Duration(vopt.Lifetime) * time.Second)
 	if err = db.AddFileLifetime(ofile, "video", deleteDate.Format(time.RFC3339)); err != nil {

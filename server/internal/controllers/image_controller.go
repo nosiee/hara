@@ -30,7 +30,7 @@ func ImageController(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: valudate lifetime
+	// TODO: validate lifetime
 	os.Remove(fpath)
 	deleteDate := time.Now().Add(time.Duration(iopt.Lifetime) * time.Second)
 	if err = db.AddFileLifetime(ofile, "image", deleteDate.Format(time.RFC3339)); err != nil {

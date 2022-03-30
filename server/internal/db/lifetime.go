@@ -15,7 +15,7 @@ func AddFileLifetime(fpath, ftype, deleteDate string) error {
 }
 
 func deleteExpiredFilesTicker() {
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(time.Hour)
 	closeTicker = make(chan struct{})
 
 	for {
