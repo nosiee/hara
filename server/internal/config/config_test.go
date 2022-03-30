@@ -57,18 +57,21 @@ func TestLoadFromEnv(t *testing.T) {
 }
 
 func TestLoadFromFile(t *testing.T) {
+
+	t.Log(os.Getwd())
+
 	testCases := []struct {
 		fpath   string
 		correct bool
 		name    string
 	}{
 		{
-			"testconfigs/config_test_correct.toml",
+			"../../testdata/configs/config_test_correct.toml",
 			true,
 			"CorrectFile",
 		},
 		{
-			"testconfigs/config_test_incorrect.toml",
+			"../../testdata/configs/config_test_incorrect.toml",
 			false,
 			"IncorrectFile",
 		},

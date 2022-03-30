@@ -1,5 +1,0 @@
-APIEndPoint = ":8080"
-UploadImagePath = "upload/images"
-UploadVideoPath = "upload/videos"
-OutputImagePath = "output/images"
-OutputvideoPath = "output/videos"

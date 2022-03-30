@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"fmt"
+	"io"
 	"net/http"
-	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,10 +18,10 @@ func GenerateFileUrl(ctx *gin.Context, apiPrefix, ofile string) string {
 	return fmt.Sprintf("%s%s/api/%s/%s", proto, ctx.Request.Host, apiPrefix, ofile)
 }
 
-func GetFileContentType(f *os.File) (string, error) {
+func GetFileContentType(reader io.Reader) (string, error) {
 	buffer := make([]byte, 512)
 
-	if _, err := f.Read(buffer); err != nil {
+	if _, err := reader.Read(buffer); err != nil {
 		return "", err
 	}
 
