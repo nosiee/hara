@@ -12,8 +12,8 @@ var (
 )
 
 func RunServer(endpoint string) {
-	gen.POST("/api/convert/video", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateVideoOptionsJson, middleware.SupportedVideoFileFormat, controllers.VideoController)
-	gen.POST("/api/convert/image", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateImageOptionsJson, middleware.SupportedImageFileFormat, controllers.ImageController)
+	gen.POST("/api/convert/video", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateVideoOptionsJson, middleware.SupportedVideoFileFormat, middleware.ValidateLifetime, controllers.VideoController)
+	gen.POST("/api/convert/image", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateImageOptionsJson, middleware.SupportedImageFileFormat, middleware.ValidateLifetime, controllers.ImageController)
 	gen.GET("/api/i/:filename", controllers.GetImage)
 	gen.GET("/api/v/:filename", controllers.GetVideo)
 

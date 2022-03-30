@@ -13,7 +13,7 @@ import (
 )
 
 func VideoController(ctx *gin.Context) {
-	voptIface, _ := ctx.Get("videoOptions")
+	voptIface, _ := ctx.Get("options")
 	fileIface, _ := ctx.Get("file")
 
 	vopt := voptIface.(convert.ConversionVideoOptions)
@@ -30,7 +30,6 @@ func VideoController(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: validate lifetime
 	os.Remove(fpath)
 	deleteDate := time.Now().Add(time.Duration(vopt.Lifetime) * time.Second)
 	if err = db.AddFileLifetime(ofile, "video", deleteDate.Format(time.RFC3339)); err != nil {

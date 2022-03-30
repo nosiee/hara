@@ -13,7 +13,7 @@ import (
 )
 
 func ImageController(ctx *gin.Context) {
-	ioptIface, _ := ctx.Get("imageOptions")
+	ioptIface, _ := ctx.Get("options")
 	fileIface, _ := ctx.Get("file")
 
 	iopt := ioptIface.(convert.ConversionImageOptions)
@@ -30,7 +30,6 @@ func ImageController(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: validate lifetime
 	os.Remove(fpath)
 	deleteDate := time.Now().Add(time.Duration(iopt.Lifetime) * time.Second)
 	if err = db.AddFileLifetime(ofile, "image", deleteDate.Format(time.RFC3339)); err != nil {

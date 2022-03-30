@@ -77,10 +77,10 @@ func testSupportedFileFormat(t *testing.T, c contextCase, f func(*gin.Context)) 
 
 	switch c.context.(type) {
 	case convert.ConversionImageOptions:
-		ctx.Set("imageOptions", c.context.(convert.ConversionImageOptions))
+		ctx.Set("options", c.context.(convert.ConversionImageOptions))
 		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionImageOptions).Extension})
 	case convert.ConversionVideoOptions:
-		ctx.Set("videoOptions", c.context.(convert.ConversionVideoOptions))
+		ctx.Set("options", c.context.(convert.ConversionVideoOptions))
 		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionVideoOptions).Extension})
 	}
 
@@ -158,7 +158,7 @@ func TestValidateVideoOptionsJson(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := testFieldProvided(t, c, ValidateVideoOptionsJson)
 
-			got, ok := ctx.Get("videoOptions")
+			got, ok := ctx.Get("options")
 			if !ok {
 				t.Fatalf("%s: videoOptions not set", c.name)
 			}
@@ -191,7 +191,7 @@ func TestValidateImageOptionsJson(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			ctx := testFieldProvided(t, c, ValidateImageOptionsJson)
 
-			got, ok := ctx.Get("imageOptions")
+			got, ok := ctx.Get("options")
 			if !ok {
 				t.Fatalf("%s: imageOptions not set", c.name)
 			}
@@ -247,6 +247,91 @@ func TestSupportedImageFileFormat(t *testing.T) {
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
 			testSupportedFileFormat(t, c, SupportedImageFileFormat)
+		})
+	}
+}
+
+func TestValidateLifetime(t *testing.T) {
+	correctLifetime := convert.ConversionImageOptions{Lifetime: 4200}
+	moreThanMonthLifetimeImage := convert.ConversionImageOptions{Lifetime: 934579384759374985}
+	lessThanHourLifetimeImage := convert.ConversionImageOptions{Lifetime: 120}
+
+	lessThanHourLifetimeVideo := convert.ConversionVideoOptions{Lifetime: 120}
+	moreThanMonthLifetimeVideo := convert.ConversionVideoOptions{Lifetime: 934579384759374985}
+
+	testCases := []struct {
+		options  any
+		correct  bool
+		lifetime uint
+		name     string
+	}{
+		{
+			correctLifetime,
+			true,
+			4200,
+			"CorrectLifetime",
+		},
+		{
+			moreThanMonthLifetimeImage,
+			false,
+			934579384759374985,
+			"MoreThanMonthImage",
+		},
+		{
+			lessThanHourLifetimeImage,
+			false,
+			120,
+			"LessThanHourImage",
+		},
+		{
+			moreThanMonthLifetimeVideo,
+			false,
+			934579384759374985,
+			"MoreThanMonthVideo",
+		},
+		{
+			lessThanHourLifetimeVideo,
+			false,
+			120,
+			"LessThanHourVideo",
+		},
+	}
+
+	for _, c := range testCases {
+		t.Run(c.name, func(t *testing.T) {
+			ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+			ctx.Set("options", c.options)
+
+			ValidateLifetime(ctx)
+
+			var context any
+			var ok bool
+			var checkedLifetime uint
+
+			if context, ok = ctx.Get("options"); !ok {
+				t.Fatalf("%s no context after ValidateLifetime", c.name)
+			}
+
+			switch context.(type) {
+			case convert.ConversionImageOptions:
+				checkedLifetime = context.(convert.ConversionImageOptions).Lifetime
+			case convert.ConversionVideoOptions:
+				checkedLifetime = context.(convert.ConversionVideoOptions).Lifetime
+			}
+
+			if c.correct && c.lifetime != checkedLifetime {
+				t.Fatalf("%s want %d, got %d", c.name, c.lifetime, checkedLifetime)
+			}
+
+			if !c.correct {
+				if c.lifetime < hourInSeconds && checkedLifetime != hourInSeconds {
+					t.Fatalf("%s want %d, got %d", c.name, hourInSeconds, checkedLifetime)
+				}
+
+				if c.lifetime > monthInSeconds && checkedLifetime != monthInSeconds {
+					t.Fatalf("%s want %d, got %d", c.name, monthInSeconds, checkedLifetime)
+				}
+			}
 		})
 	}
 }

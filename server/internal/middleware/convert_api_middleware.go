@@ -10,6 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+const (
+	hourInSeconds  = 3600
+	monthInSeconds = 2592000
+)
+
 func OptionsFieldProvided(ctx *gin.Context) {
 	if _, ok := ctx.GetPostForm("options"); !ok {
 		ctx.AbortWithStatusJSON(400, gin.H{
@@ -39,7 +44,7 @@ func ValidateVideoOptionsJson(ctx *gin.Context) {
 		})
 	}
 
-	ctx.Set("videoOptions", vopt)
+	ctx.Set("options", vopt)
 }
 
 func ValidateImageOptionsJson(ctx *gin.Context) {
@@ -52,13 +57,13 @@ func ValidateImageOptionsJson(ctx *gin.Context) {
 		})
 	}
 
-	ctx.Set("imageOptions", iopt)
+	ctx.Set("options", iopt)
 }
 
 func SupportedVideoFileFormat(ctx *gin.Context) {
 	var supportedFilePattern = "(3g2|3gp|3gpp|avi|cavs|dv|dvr|flv|m2ts|m4v|mkv|mod|mov|mp4|mpeg|mpg|mts|mxf|ogg|rm|webm|wmv)$"
 	supportedFileRegexp, _ := regexp.Compile(supportedFilePattern)
-	vopt, _ := ctx.Get("videoOptions")
+	vopt, _ := ctx.Get("options")
 	f, _ := ctx.Get("file")
 
 	if !supportedFileRegexp.MatchString(f.(*multipart.FileHeader).Filename) {
@@ -77,7 +82,7 @@ func SupportedVideoFileFormat(ctx *gin.Context) {
 func SupportedImageFileFormat(ctx *gin.Context) {
 	var supportedFilePattern = "(jpg|jpeg|png|webp|gif|ico|bmp)$"
 	supportedFileRegexp, _ := regexp.Compile(supportedFilePattern)
-	iopt, _ := ctx.Get("imageOptions")
+	iopt, _ := ctx.Get("options")
 	f, _ := ctx.Get("file")
 
 	if !supportedFileRegexp.MatchString(f.(*multipart.FileHeader).Filename) {
@@ -90,5 +95,33 @@ func SupportedImageFileFormat(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})
+	}
+}
+
+func ValidateLifetime(ctx *gin.Context) {
+	options, _ := ctx.Get("options")
+
+	switch options.(type) {
+	case convert.ConversionImageOptions:
+		iopt := options.(convert.ConversionImageOptions)
+
+		if iopt.Lifetime < hourInSeconds {
+			iopt.Lifetime = hourInSeconds
+		} else if iopt.Lifetime > monthInSeconds {
+			iopt.Lifetime = monthInSeconds
+		}
+
+		ctx.Set("options", iopt)
+
+	case convert.ConversionVideoOptions:
+		vopt := options.(convert.ConversionVideoOptions)
+
+		if vopt.Lifetime < hourInSeconds {
+			vopt.Lifetime = hourInSeconds
+		} else if vopt.Lifetime > monthInSeconds {
+			vopt.Lifetime = monthInSeconds
+		}
+
+		ctx.Set("options", vopt)
 	}
 }

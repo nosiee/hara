@@ -11,7 +11,7 @@ test:
 
 testscover:
 	go test -v -coverprofile testdata/tests_cover.out ./...
-	go tool -html=testdata/tests_cover.out
+	go tool cover -html=testdata/tests_cover.out
 
 clean:
 	go clean
