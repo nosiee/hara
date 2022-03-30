@@ -1,6 +1,7 @@
 # -- Folders
 server/upload
 server/output
+server/bin
 configs
 
 # -- Files
