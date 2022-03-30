@@ -42,3 +42,26 @@ func ImageController(ctx *gin.Context) {
 
 	ctx.String(200, GenerateFileUrl(ctx, "i", ofile))
 }
+
+func GetImage(ctx *gin.Context) {
+	fpath := fmt.Sprintf("%s/%s", config.Values.OutputImagePath, ctx.Param("filename"))
+	file, err := os.Open(fpath)
+
+	if err != nil {
+		ctx.JSON(404, gin.H{
+			"error": "File not found",
+		})
+		return
+	}
+
+	contentType, err := GetFileContentType(file)
+	if err != nil {
+		ctx.JSON(404, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.Header("Content-Type", contentType)
+	ctx.File(fpath)
+}

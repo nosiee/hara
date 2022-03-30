@@ -42,3 +42,26 @@ func VideoController(ctx *gin.Context) {
 
 	ctx.String(200, fmt.Sprintf("http://localhost:8080/api/v/%s", ofile))
 }
+
+func GetVideo(ctx *gin.Context) {
+	fpath := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, ctx.Param("filename"))
+	file, err := os.Open(fpath)
+
+	if err != nil {
+		ctx.JSON(404, gin.H{
+			"error": "File not found",
+		})
+		return
+	}
+
+	contentType, err := GetFileContentType(file)
+	if err != nil {
+		ctx.JSON(404, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.Header("Content-Type", contentType)
+	ctx.File(fpath)
+}
