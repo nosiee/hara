@@ -57,9 +57,6 @@ func TestLoadFromEnv(t *testing.T) {
 }
 
 func TestLoadFromFile(t *testing.T) {
-
-	t.Log(os.Getwd())
-
 	testCases := []struct {
 		fpath   string
 		correct bool

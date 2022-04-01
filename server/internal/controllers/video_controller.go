@@ -39,16 +39,24 @@ func VideoController(ctx *gin.Context) {
 		return
 	}
 
-	ctx.String(200, fmt.Sprintf("http://localhost:8080/api/v/%s", ofile))
+	ctx.String(200, GenerateFileUrl(ctx, "v", ofile))
 }
 
 func GetVideo(ctx *gin.Context) {
-	fpath := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, ctx.Param("filename"))
-	file, err := os.Open(fpath)
+	fname := ctx.Param("filename")
+	fpath := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, fname)
 
-	if err != nil {
+	if ok := db.FileIsExists(fname); !ok {
 		ctx.JSON(404, gin.H{
 			"error": "File not found",
+		})
+		return
+	}
+
+	file, err := os.Open(fpath)
+	if err != nil {
+		ctx.JSON(404, gin.H{
+			"error": err.Error(),
 		})
 		return
 	}

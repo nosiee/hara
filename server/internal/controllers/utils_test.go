@@ -9,6 +9,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func init() {
+	gin.SetMode(gin.TestMode)
+}
+
 func TestGenerateFileUrl(t *testing.T) {
 	testCases := []struct {
 		proto     string

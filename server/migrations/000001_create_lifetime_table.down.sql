@@ -1,1 +1,1 @@
-DROP TABLE lifetimes;
+DROP TABLE IF EXISTS lifetimes;

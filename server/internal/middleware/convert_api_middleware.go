@@ -21,6 +21,8 @@ func OptionsFieldProvided(ctx *gin.Context) {
 			"error": "Request cannot be processed. Options field not provided",
 		})
 	}
+
+	// NOTE: maybe we should validate json here?
 }
 
 func FileFieldProvided(ctx *gin.Context) {
@@ -105,10 +107,8 @@ func ValidateLifetime(ctx *gin.Context) {
 	case convert.ConversionImageOptions:
 		iopt := options.(convert.ConversionImageOptions)
 
-		if iopt.Lifetime < hourInSeconds {
+		if iopt.Lifetime < hourInSeconds || iopt.Lifetime > monthInSeconds {
 			iopt.Lifetime = hourInSeconds
-		} else if iopt.Lifetime > monthInSeconds {
-			iopt.Lifetime = monthInSeconds
 		}
 
 		ctx.Set("options", iopt)
@@ -116,10 +116,8 @@ func ValidateLifetime(ctx *gin.Context) {
 	case convert.ConversionVideoOptions:
 		vopt := options.(convert.ConversionVideoOptions)
 
-		if vopt.Lifetime < hourInSeconds {
+		if vopt.Lifetime < hourInSeconds || vopt.Lifetime > monthInSeconds {
 			vopt.Lifetime = hourInSeconds
-		} else if vopt.Lifetime > monthInSeconds {
-			vopt.Lifetime = monthInSeconds
 		}
 
 		ctx.Set("options", vopt)

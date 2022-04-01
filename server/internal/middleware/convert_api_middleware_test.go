@@ -160,11 +160,11 @@ func TestValidateVideoOptionsJson(t *testing.T) {
 
 			got, ok := ctx.Get("options")
 			if !ok {
-				t.Fatalf("%s: videoOptions not set", c.name)
+				t.Fatalf("%s: options not set", c.name)
 			}
 
 			if got.(convert.ConversionVideoOptions) != options {
-				t.Fatalf("%s: videoOptions not equal options", c.name)
+				t.Fatalf("%s: options not equal options", c.name)
 			}
 		})
 	}
@@ -193,11 +193,11 @@ func TestValidateImageOptionsJson(t *testing.T) {
 
 			got, ok := ctx.Get("options")
 			if !ok {
-				t.Fatalf("%s: imageOptions not set", c.name)
+				t.Fatalf("%s: options not set", c.name)
 			}
 
 			if got.(convert.ConversionImageOptions) != options {
-				t.Fatalf("%s: imageOptions not equal options", c.name)
+				t.Fatalf("%s: options not equal options", c.name)
 			}
 		})
 	}
@@ -324,12 +324,8 @@ func TestValidateLifetime(t *testing.T) {
 			}
 
 			if !c.correct {
-				if c.lifetime < hourInSeconds && checkedLifetime != hourInSeconds {
+				if (c.lifetime < hourInSeconds || c.lifetime > monthInSeconds) && checkedLifetime != hourInSeconds {
 					t.Fatalf("%s want %d, got %d", c.name, hourInSeconds, checkedLifetime)
-				}
-
-				if c.lifetime > monthInSeconds && checkedLifetime != monthInSeconds {
-					t.Fatalf("%s want %d, got %d", c.name, monthInSeconds, checkedLifetime)
 				}
 			}
 		})

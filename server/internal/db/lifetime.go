@@ -10,8 +10,14 @@ import (
 var closeTicker chan struct{}
 
 func AddFileLifetime(fpath, ftype, deleteDate string) error {
-	_, err := db.Exec(fmt.Sprintf("INSERT INTO lifetimes(filename,filetype,deletedate) VALUES('%s','%s','%s')", fpath, ftype, deleteDate))
+	_, err := db.Exec("INSERT INTO lifetimes(filename,filetype,deletedate) VALUES($1, $2, $3)", fpath, ftype, deleteDate)
 	return err
+}
+
+func FileIsExists(fname string) bool {
+	var ID int
+	_ = db.QueryRow("SELECT id FROM lifetimes WHERE filename=$1", fname).Scan(&ID)
+	return ID != 0
 }
 
 func deleteExpiredFilesTicker() {

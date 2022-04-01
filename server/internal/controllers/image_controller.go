@@ -43,12 +43,20 @@ func ImageController(ctx *gin.Context) {
 }
 
 func GetImage(ctx *gin.Context) {
-	fpath := fmt.Sprintf("%s/%s", config.Values.OutputImagePath, ctx.Param("filename"))
-	file, err := os.Open(fpath)
+	fname := ctx.Param("filename")
+	fpath := fmt.Sprintf("%s/%s", config.Values.OutputImagePath, fname)
 
-	if err != nil {
+	if ok := db.FileIsExists(fname); !ok {
 		ctx.JSON(404, gin.H{
 			"error": "File not found",
+		})
+		return
+	}
+
+	file, err := os.Open(fpath)
+	if err != nil {
+		ctx.JSON(404, gin.H{
+			"error": err.Error(),
 		})
 		return
 	}

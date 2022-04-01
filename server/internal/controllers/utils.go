@@ -9,13 +9,14 @@ import (
 )
 
 func GenerateFileUrl(ctx *gin.Context, apiPrefix, ofile string) string {
-	proto := "http://"
+	scheme := "http://"
+	host := ctx.Request.Host
 
 	if ctx.Request.Proto == "HTTP/2" {
-		proto = "https://"
+		scheme = "https://"
 	}
 
-	return fmt.Sprintf("%s%s/api/%s/%s", proto, ctx.Request.Host, apiPrefix, ofile)
+	return fmt.Sprintf("%s%s/api/%s/%s", scheme, host, apiPrefix, ofile)
 }
 
 func GetFileContentType(reader io.Reader) (string, error) {
