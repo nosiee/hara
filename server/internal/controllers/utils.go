@@ -1,10 +1,14 @@
 package controllers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
@@ -28,4 +32,24 @@ func GetFileContentType(reader io.Reader) (string, error) {
 
 	contentType := http.DetectContentType(buffer)
 	return contentType, nil
+}
+
+func GenerateRandomUUID() string {
+	u := make([]byte, 32)
+	_, _ = rand.Read(u)
+
+	u[8] = (u[8] | 0x80) & 0xBF
+	u[6] = (u[6] | 0x40) & 0x4F
+
+	return hex.EncodeToString(u)
+}
+
+func GenerateJWT(uuid, key string) (string, error) {
+	payload := jwt.MapClaims{}
+	payload["uuid"] = uuid
+	payload["exp"] = time.Now().Add(1 * 365 * 24 * time.Hour).Unix()
+
+	header := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+
+	return header.SignedString([]byte(key))
 }

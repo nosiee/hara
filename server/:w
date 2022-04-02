@@ -1,0 +1,12 @@
+package db
+
+func CreateNewUser(uuid, username, hash, email string) error {
+	_, err := db.Exec("INSERT INTO users(uuid, username, hash, email) VALUES($1, $2, $3, $4)", uuid, username, hash, email)
+	return err
+}
+
+func FindUser(username string) (interface{}, error) {
+	r, err := db.Exec("SELECT * FROM users WHERE username=$1", username)
+
+	fmt.Println(r, err)
+}

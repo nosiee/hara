@@ -8,6 +8,7 @@ import (
 func TestLoadFromEnv(t *testing.T) {
 	correctEnvs := make(map[string]string, 6)
 	correctEnvs["API_ENDPOINT"] = ":8080"
+	correctEnvs["JWT_KEY"] = "SUPER_SECRET_TOKEN"
 	correctEnvs["UPLOAD_IMAGE_PATH"] = "upload/images"
 	correctEnvs["UPLOAD_VIDEO_PATH"] = "upload/videos"
 	correctEnvs["OUTPUT_IMAGE_PATH"] = "output/images"
