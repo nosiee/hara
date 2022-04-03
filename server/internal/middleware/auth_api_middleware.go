@@ -26,6 +26,8 @@ func AuthFormProvided(ctx *gin.Context) {
 		})
 	}
 
+	fmt.Println(ctx.Request.RequestURI)
+
 	if ctx.Request.RequestURI == "/api/auth/signup" {
 		if !emailOk {
 			ctx.AbortWithStatusJSON(400, gin.H{
@@ -64,7 +66,6 @@ func AuthFormValidate(ctx *gin.Context) {
 func IsAuthorized(ctx *gin.Context) {
 	token, err := ctx.Cookie("jwt")
 	if err != nil {
-		fmt.Println(err)
 		ctx.AbortWithStatusJSON(401, gin.H{
 			"error": "not authorized",
 		})

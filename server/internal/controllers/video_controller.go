@@ -46,7 +46,7 @@ func GetVideo(ctx *gin.Context) {
 	fname := ctx.Param("filename")
 	fpath := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, fname)
 
-	if ok := db.FileIsExists(fname); !ok {
+	if ok := db.IsFileExists(fname); !ok {
 		ctx.JSON(404, gin.H{
 			"error": "File not found",
 		})

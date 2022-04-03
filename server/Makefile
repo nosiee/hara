@@ -15,5 +15,5 @@ testscover:
 
 clean:
 	go clean
-	rm testdata/tests_conver.out
+	rm testdata/tests_cover.out
 	rm bin/${BINARY_NAME}
