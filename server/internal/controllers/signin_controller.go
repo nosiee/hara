@@ -38,7 +38,8 @@ func SignIn(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("jwt", token, int(time.Now().Add(1*365*24*time.Hour).Unix()), "/", "localhost", true, true)
+	// TODO: dont forget to change secure to true
+	ctx.SetCookie("jwt", token, int(time.Now().Add(1*365*24*time.Hour).Unix()), "/", "", false, true)
 	ctx.JSON(200, gin.H{
 		"message": "ok",
 	})

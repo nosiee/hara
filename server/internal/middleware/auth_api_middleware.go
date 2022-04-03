@@ -1,9 +1,12 @@
 package middleware
 
 import (
+	"fmt"
+	"hara/internal/config"
 	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 func AuthFormProvided(ctx *gin.Context) {
@@ -55,5 +58,25 @@ func AuthFormValidate(ctx *gin.Context) {
 				"error": ErrEmailRegex.Error(),
 			})
 		}
+	}
+}
+
+func IsAuthorized(ctx *gin.Context) {
+	token, err := ctx.Cookie("jwt")
+	if err != nil {
+		fmt.Println(err)
+		ctx.AbortWithStatusJSON(401, gin.H{
+			"error": "not authorized",
+		})
+		return
+	}
+
+	if _, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.Values.JWTKey), nil
+	}); err != nil {
+		ctx.AbortWithStatusJSON(401, gin.H{
+			"error": err.Error(),
+		})
+		return
 	}
 }

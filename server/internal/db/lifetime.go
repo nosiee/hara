@@ -14,7 +14,7 @@ func AddFileLifetime(fpath, ftype, deleteDate string) error {
 	return err
 }
 
-func FileIsExists(fname string) bool {
+func IsFileExists(fname string) bool {
 	var ID int
 	_ = db.QueryRow("SELECT id FROM lifetimes WHERE filename=$1", fname).Scan(&ID)
 	return ID != 0

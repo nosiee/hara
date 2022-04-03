@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 func GenerateFileUrl(ctx *gin.Context, apiPrefix, ofile string) string {
@@ -47,6 +47,7 @@ func GenerateRandomUUID() string {
 func GenerateJWT(uuid, key string) (string, error) {
 	payload := jwt.MapClaims{}
 	payload["uuid"] = uuid
+	// TODO: make time constant and use it in signup and signin functions
 	payload["exp"] = time.Now().Add(1 * 365 * 24 * time.Hour).Unix()
 
 	header := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)

@@ -15,6 +15,8 @@ func RunServer(endpoint string) {
 	gen.POST("/api/auth/signup", middleware.AuthFormProvided, middleware.AuthFormValidate, controllers.SignUp)
 	gen.POST("/api/auth/signin", middleware.AuthFormValidate, middleware.AuthFormValidate, controllers.SignIn)
 
+	gen.GET("/api/key/get", middleware.IsAuthorized, controllers.GetApiKey)
+
 	gen.POST("/api/convert/video", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateVideoOptionsJson, middleware.SupportedVideoFileFormat, middleware.ValidateLifetime, controllers.VideoController)
 	gen.POST("/api/convert/image", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateImageOptionsJson, middleware.SupportedImageFileFormat, middleware.ValidateLifetime, controllers.ImageController)
 

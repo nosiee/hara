@@ -21,8 +21,6 @@ func OptionsFieldProvided(ctx *gin.Context) {
 			"error": "Request cannot be processed. Options field not provided",
 		})
 	}
-
-	// NOTE: maybe we should validate json here?
 }
 
 func FileFieldProvided(ctx *gin.Context) {
