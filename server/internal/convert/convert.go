@@ -1,12 +1,11 @@
 package convert
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
 	"hara/internal/config"
 	"reflect"
 
+	"github.com/google/uuid"
 	"github.com/xfrr/goffmpeg/models"
 	"github.com/xfrr/goffmpeg/transcoder"
 	"gopkg.in/gographics/imagick.v3/imagick"
@@ -49,7 +48,9 @@ func init() {
 }
 
 func ConvertVideo(ifile string, options ConversionVideoOptions) (ofilename string, err error) {
-	ofilename = fmt.Sprintf("%s.%s", getRandomFileName(), options.Extension)
+	fname := uuid.NewString()
+
+	ofilename = fmt.Sprintf("%s.%s", fname, options.Extension)
 	ofilepath := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, ofilename)
 
 	if err = tscoder.Initialize(ifile, ofilepath); err != nil {
@@ -71,7 +72,9 @@ func ConvertVideo(ifile string, options ConversionVideoOptions) (ofilename strin
 }
 
 func ConvertImage(ifile string, options ConversionImageOptions) (ofilename string, err error) {
-	ofilename = fmt.Sprintf("%s.%s", getRandomFileName(), options.Extension)
+	fname := uuid.NewString()
+
+	ofilename = fmt.Sprintf("%s.%s", fname, options.Extension)
 	ofilepath := fmt.Sprintf("%s/%s", config.Values.OutputImagePath, ofilename)
 
 	imagick.Initialize()
@@ -96,14 +99,4 @@ func ConvertImage(ifile string, options ConversionImageOptions) (ofilename strin
 
 	mw.WriteImage(ofilepath)
 	return
-}
-
-func getRandomFileName() string {
-	u := make([]byte, 8)
-	_, _ = rand.Read(u)
-
-	u[7] = (u[7] | 0x80) & 0xBF
-	u[5] = (u[5] | 0x40) & 0x4F
-
-	return hex.EncodeToString(u)
 }
