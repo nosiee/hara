@@ -10,7 +10,6 @@ import (
 func GetApiKey(ctx *gin.Context) {
 	token, _ := ctx.Cookie("jwt")
 	id, err := ExtractUserIDFromJWT(token)
-	apiKey := uuid.NewString()
 
 	if err != nil {
 		ctx.JSON(400, gin.H{
@@ -19,11 +18,14 @@ func GetApiKey(ctx *gin.Context) {
 		return
 	}
 
+	apiKey := uuid.NewString()
 	if err = db.AddNewApiKey(id, apiKey, 100); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
 	}
 
-	ctx.String(200, apiKey)
+	ctx.JSON(200, gin.H{
+		"key": apiKey,
+	})
 }

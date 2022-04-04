@@ -17,8 +17,18 @@ func RunServer(endpoint string) {
 
 	gen.GET("/api/key/get", middleware.IsAuthorized, controllers.GetApiKey)
 
-	gen.POST("/api/convert/video", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateVideoOptionsJson, middleware.SupportedVideoFileFormat, middleware.ValidateLifetime, controllers.VideoController)
-	gen.POST("/api/convert/image", middleware.OptionsFieldProvided, middleware.FileFieldProvided, middleware.ValidateImageOptionsJson, middleware.SupportedImageFileFormat, middleware.ValidateLifetime, controllers.ImageController)
+	gen.POST("/api/convert/video&key=:key",
+		middleware.ApiKeyProvided, middleware.ApiKeyValidate,
+		middleware.ApiQuotas, middleware.OptionsFieldProvided,
+		middleware.FileFieldProvided, middleware.ValidateVideoOptionsJson,
+		middleware.SupportedVideoFileFormat, middleware.ValidateLifetime,
+		controllers.VideoController)
+	gen.POST("/api/convert/image&key=:key",
+		middleware.ApiKeyProvided, middleware.ApiKeyValidate,
+		middleware.ApiQuotas, middleware.OptionsFieldProvided,
+		middleware.FileFieldProvided, middleware.ValidateImageOptionsJson,
+		middleware.SupportedImageFileFormat, middleware.ValidateLifetime,
+		controllers.ImageController)
 
 	gen.GET("/api/i/:filename", controllers.GetImage)
 	gen.GET("/api/v/:filename", controllers.GetVideo)
