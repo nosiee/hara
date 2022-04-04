@@ -122,7 +122,7 @@ func TestGenerateJWT(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			_, err := GenerateJWT("uuid", c.key)
+			_, err := GenerateJWT("someid", c.key)
 
 			if c.correct && err != nil {
 				t.Fatalf("%s want err == nil, got %v", c.name, err)

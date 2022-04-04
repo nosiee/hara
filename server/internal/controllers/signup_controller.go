@@ -6,6 +6,7 @@ import (
 	"hara/internal/db"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -13,7 +14,7 @@ func SignUp(ctx *gin.Context) {
 	username, _ := ctx.GetPostForm("username")
 	password, _ := ctx.GetPostForm("password")
 	email, _ := ctx.GetPostForm("email")
-	uuid := GenerateRandomUUID()
+	uuid := uuid.New()
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -23,14 +24,14 @@ func SignUp(ctx *gin.Context) {
 		return
 	}
 
-	if err := db.CreateNewUser(uuid, username, hex.EncodeToString(hash[:]), email); err != nil {
+	if err := db.CreateNewUser(uuid.String(), username, hex.EncodeToString(hash[:]), email); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	token, err := GenerateJWT(uuid, config.Values.HS512Key)
+	token, err := GenerateJWT(uuid.String(), config.Values.HS512Key)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),

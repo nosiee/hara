@@ -1,9 +1,8 @@
 package controllers
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
+	"hara/internal/config"
 	"io"
 	"net/http"
 
@@ -33,16 +32,6 @@ func GetFileContentType(reader io.Reader) (string, error) {
 	return contentType, nil
 }
 
-func GenerateRandomUUID() string {
-	u := make([]byte, 32)
-	_, _ = rand.Read(u)
-
-	u[8] = (u[8] | 0x80) & 0xBF
-	u[6] = (u[6] | 0x40) & 0x4F
-
-	return hex.EncodeToString(u)
-}
-
 func GenerateJWT(uuid string, key string) (string, error) {
 	if len(key) != 64 {
 		return "", jwt.ErrInvalidKey
@@ -55,4 +44,21 @@ func GenerateJWT(uuid string, key string) (string, error) {
 	header := jwt.NewWithClaims(jwt.SigningMethodHS512, payload)
 
 	return header.SignedString([]byte(key))
+}
+
+func ExtractUserIDFromJWT(t string) (string, error) {
+	token, err := jwt.Parse(t, func(t *jwt.Token) (interface{}, error) {
+		return []byte(config.Values.HS512Key), nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok || !token.Valid {
+		return "", token.Claims.Valid()
+	}
+
+	return claims["uuid"].(string), nil
 }
