@@ -1,7 +1,7 @@
 package db
 
 func AddNewApiKey(uuid, key string, quotas int) error {
-	_, err := db.Exec("INSERT INTO apikeys(owneruuid, key, quotas) VALUES($1, $2, $3)", uuid, key, quotas)
+	_, err := db.Exec("INSERT INTO apikeys(owneruuid, key, maxquotas, quotas) VALUES($1, $2, $3, $4)", uuid, key, quotas, 0)
 	return err
 }
 
@@ -19,9 +19,14 @@ func IsKeyExists(key string) (bool, error) {
 	return ID != 0, err
 }
 
-func GetKeyQuotas(key string) (int, error) {
-	var quotas int
+func GetKeyQuotas(key string) (int, int, error) {
+	var maxquotas, quotas int
 
-	err := db.QueryRow("SELECT quotas from apikeys WHERE key=$1", key).Scan(&quotas)
-	return quotas, err
+	err := db.QueryRow("SELECT maxquotas, quotas FROM apikeys WHERE key=$1", key).Scan(&maxquotas, &quotas)
+	return maxquotas, quotas, err
+}
+
+func UpdateKeyQuotas(key string, quotas int) error {
+	_, err := db.Exec("UPDATE apikeys SET quotas=$1 WHERE key=$2", quotas, key)
+	return err
 }
