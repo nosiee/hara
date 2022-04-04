@@ -7,7 +7,7 @@ import (
 
 type values struct {
 	APIEndPoint     string `envconfig:"API_ENDPOINT" required:"true"`
-	JWTKey          string `envconfig:"JWT_KEY" required:"true"`
+	HS512Key        string `envconfig:"HS512_KEY" required:"true"`
 	DatabaseURL     string `envconfig:"DATABASE_URL" required:"true"`
 	UploadImagePath string `envconfig:"UPLOAD_IMAGE_PATH" required:"true"`
 	UploadVideoPath string `envconfig:"UPLOAD_VIDEO_PATH" required:"true"`

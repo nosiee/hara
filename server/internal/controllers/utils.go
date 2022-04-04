@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -44,13 +43,16 @@ func GenerateRandomUUID() string {
 	return hex.EncodeToString(u)
 }
 
-func GenerateJWT(uuid, key string) (string, error) {
+func GenerateJWT(uuid string, key string) (string, error) {
+	if len(key) != 64 {
+		return "", jwt.ErrInvalidKey
+	}
+
 	payload := jwt.MapClaims{}
 	payload["uuid"] = uuid
-	// TODO: make time constant and use it in signup and signin functions
-	payload["exp"] = time.Now().Add(1 * 365 * 24 * time.Hour).Unix()
+	payload["exp"] = JWTExp
 
-	header := jwt.NewWithClaims(jwt.SigningMethodHS256, payload)
+	header := jwt.NewWithClaims(jwt.SigningMethodHS512, payload)
 
 	return header.SignedString([]byte(key))
 }

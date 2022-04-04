@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"hara/internal/config"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -94,6 +95,41 @@ func TestGetFileContentType(t *testing.T) {
 
 			if contentType != c.contentType {
 				t.Fatalf("%s want %s, got %s", c.name, c.contentType, contentType)
+			}
+		})
+	}
+}
+
+func TestGenerateJWT(t *testing.T) {
+	config.LoadFromFile("../../testdata/configs/config_test_correct.toml")
+
+	testCases := []struct {
+		key     string
+		correct bool
+		name    string
+	}{
+		{
+			config.Values.HS512Key,
+			true,
+			"CorrectJWTKey",
+		},
+		{
+			"not_valid_key",
+			false,
+			"IncorrectJWTKey",
+		},
+	}
+
+	for _, c := range testCases {
+		t.Run(c.name, func(t *testing.T) {
+			_, err := GenerateJWT("uuid", c.key)
+
+			if c.correct && err != nil {
+				t.Fatalf("%s want err == nil, got %v", c.name, err)
+			}
+
+			if !c.correct && err == nil {
+				t.Fatalf("%s want err != nil, got nil", c.name)
 			}
 		})
 	}

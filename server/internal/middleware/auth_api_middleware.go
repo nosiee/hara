@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"hara/internal/config"
 	"unicode/utf8"
 
@@ -25,8 +24,6 @@ func AuthFormProvided(ctx *gin.Context) {
 			"error": "password required but not provided",
 		})
 	}
-
-	fmt.Println(ctx.Request.RequestURI)
 
 	if ctx.Request.RequestURI == "/api/auth/signup" {
 		if !emailOk {
@@ -73,7 +70,7 @@ func IsAuthorized(ctx *gin.Context) {
 	}
 
 	if _, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
-		return []byte(config.Values.JWTKey), nil
+		return []byte(config.Values.HS512Key), nil
 	}); err != nil {
 		ctx.AbortWithStatusJSON(401, gin.H{
 			"error": err.Error(),

@@ -10,8 +10,12 @@ test:
 	go test -v -cover ./...
 
 testscover:
-	go test -v -coverprofile testdata/tests_cover.out ./...
+	go test -coverprofile testdata/tests_cover.out ./...
 	go tool cover -html=testdata/tests_cover.out
+
+totalcover:
+	go test -coverprofile testdata/tests_cover.out ./...
+	go tool cover -func testdata/tests_cover.out
 
 clean:
 	go clean

@@ -106,7 +106,7 @@ func TestAuthFormValidate(t *testing.T) {
 
 func TestIsAutohorized(t *testing.T) {
 	config.LoadFromFile("../../testdata/configs/config_test_correct.toml")
-	token, err := controllers.GenerateJWT("uuid", config.Values.JWTKey)
+	token, err := controllers.GenerateJWT("uuid", config.Values.HS512Key)
 	if err != nil {
 		t.Fatal(err)
 	}

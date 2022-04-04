@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"hara/internal/config"
 	"hara/internal/db"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -31,7 +30,7 @@ func SignUp(ctx *gin.Context) {
 		return
 	}
 
-	token, err := GenerateJWT(uuid, config.Values.JWTKey)
+	token, err := GenerateJWT(uuid, config.Values.HS512Key)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -39,8 +38,7 @@ func SignUp(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: dont forget to change secure to true
-	ctx.SetCookie("jwt", token, int(time.Now().Add(1*365*24*time.Hour).Unix()), "/", "", false, true)
+	ctx.SetCookie("jwt", token, int(JWTExp), "/", "", false, true)
 	ctx.JSON(200, gin.H{
 		"message": "ok",
 	})

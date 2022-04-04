@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"hara/internal/api"
 	"hara/internal/config"
 	"hara/internal/db"
@@ -10,20 +9,30 @@ import (
 )
 
 func main() {
-	if len(os.Args) > 1 {
-		var confFile string
+	var file string
+	var help bool
 
-		flag.StringVar(&confFile, "config", "", "Config .toml file")
-		flag.Parse()
+	flag.StringVar(&file, "config", "", "Config .toml file")
+	flag.BoolVar(&help, "help", false, "Print help information")
+	flag.Parse()
 
-		config.LoadFromFile(confFile)
+	if help {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	if len(os.Args) == 1 {
+		if err := config.LoadFromEnv(); err != nil {
+			panic(err)
+		}
 	} else {
-		config.LoadFromEnv()
+		if err := config.LoadFromFile(file); err != nil {
+			panic(err)
+		}
 	}
 
 	if err := db.Connnect(config.Values.DatabaseURL); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
+		panic(err)
 	}
 
 	api.RunServer(config.Values.APIEndPoint)
