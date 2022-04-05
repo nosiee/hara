@@ -16,7 +16,7 @@ func VideoController(ctx *gin.Context) {
 	voptIface, _ := ctx.Get("options")
 	fileIface, _ := ctx.Get("file")
 
-	vopt := voptIface.(convert.ConversionVideoOptions)
+	vopt := voptIface.(convert.ConversionOptions)
 	file := fileIface.(*multipart.FileHeader)
 	fpath := fmt.Sprintf("%s/%s", config.Values.UploadVideoPath, file.Filename)
 

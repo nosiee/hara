@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"encoding/json"
 	"hara/internal/convert"
 	"net/http/httptest"
 	"testing"
@@ -12,24 +11,20 @@ import (
 func TestOptionsFieldProvided(t *testing.T) {
 	testCases := []requestCase{
 		{
-			createFormRequest(map[string]string{
-				"options": "{value}",
-			}, "/"),
+			createFormRequest(nil, "https://localhost:8080/api/convert/image?key=testkey&ext=mp4"),
 			true,
-			"CorrectFieldName",
+			"CorrectUrlQuery",
 		},
 		{
-			createFormRequest(map[string]string{
-				"not_options": "{value}",
-			}, "/"),
+			createFormRequest(nil, "https://localhost:8080/api/convert/image"),
 			false,
-			"IncorrectFieldName",
+			"IncorrectUrlQuery",
 		},
 	}
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			testRequest(t, c, OptionsFieldProvided)
+			testRequest(t, c, ConversionOptionsProvided)
 		})
 	}
 }
@@ -55,83 +50,9 @@ func TestFileFieldProvided(t *testing.T) {
 	}
 }
 
-func TestValidateVideoOptionsJson(t *testing.T) {
-	var options convert.ConversionVideoOptions
-	optionsJson, _ := json.Marshal(options)
-
-	testCases := []requestCase{
-		{
-			createFormRequest(map[string]string{
-				"options": string(optionsJson),
-			}, "/"),
-			true,
-			"CorrectJson",
-		},
-		{
-			createFormRequest(map[string]string{
-				"options": "not_json",
-			}, "/"),
-			false,
-			"IncorrectJson",
-		},
-	}
-
-	for _, c := range testCases {
-		t.Run(c.name, func(t *testing.T) {
-			ctx := testRequest(t, c, ValidateVideoOptionsJson)
-
-			got, ok := ctx.Get("options")
-			if !ok {
-				t.Fatalf("%s: options not set", c.name)
-			}
-
-			if got.(convert.ConversionVideoOptions) != options {
-				t.Fatalf("%s: options not equal options", c.name)
-			}
-		})
-	}
-}
-
-func TestValidateImageOptionsJson(t *testing.T) {
-	var options convert.ConversionImageOptions
-	optionsJson, _ := json.Marshal(options)
-
-	testCases := []requestCase{
-		{
-			createFormRequest(map[string]string{
-				"options": string(optionsJson),
-			}, "/"),
-			true,
-			"CorrectJson",
-		},
-		{
-			createFormRequest(map[string]string{
-				"options": "not_json",
-			}, "/"),
-			false,
-			"IncorrectJson",
-		},
-	}
-
-	for _, c := range testCases {
-		t.Run(c.name, func(t *testing.T) {
-			ctx := testRequest(t, c, ValidateImageOptionsJson)
-
-			got, ok := ctx.Get("options")
-			if !ok {
-				t.Fatalf("%s: options not set", c.name)
-			}
-
-			if got.(convert.ConversionImageOptions) != options {
-				t.Fatalf("%s: options not equal options", c.name)
-			}
-		})
-	}
-}
-
 func TestSupportedVideoFileFormat(t *testing.T) {
-	correctVideoFormat := convert.ConversionVideoOptions{Extension: "mp4"}
-	incorrectVideoFormat := convert.ConversionVideoOptions{Extension: "exe"}
+	correctVideoFormat := convert.ConversionOptions{Extension: "mp4"}
+	incorrectVideoFormat := convert.ConversionOptions{Extension: "exe"}
 
 	testCases := []contextCase{
 		{
@@ -154,8 +75,8 @@ func TestSupportedVideoFileFormat(t *testing.T) {
 }
 
 func TestSupportedImageFileFormat(t *testing.T) {
-	correctImageFormat := convert.ConversionImageOptions{Extension: "jpg"}
-	incorrectImageFormat := convert.ConversionImageOptions{Extension: "exe"}
+	correctImageFormat := convert.ConversionOptions{Extension: "jpg"}
+	incorrectImageFormat := convert.ConversionOptions{Extension: "exe"}
 
 	testCases := []contextCase{
 		{
@@ -178,12 +99,12 @@ func TestSupportedImageFileFormat(t *testing.T) {
 }
 
 func TestValidateLifetime(t *testing.T) {
-	correctLifetime := convert.ConversionImageOptions{Lifetime: 4200}
-	moreThanMonthLifetimeImage := convert.ConversionImageOptions{Lifetime: 934579384759374985}
-	lessThanHourLifetimeImage := convert.ConversionImageOptions{Lifetime: 120}
+	correctLifetime := convert.ConversionOptions{Lifetime: 4200}
+	moreThanMonthLifetimeImage := convert.ConversionOptions{Lifetime: 934579384759374985}
+	lessThanHourLifetimeImage := convert.ConversionOptions{Lifetime: 120}
 
-	lessThanHourLifetimeVideo := convert.ConversionVideoOptions{Lifetime: 120}
-	moreThanMonthLifetimeVideo := convert.ConversionVideoOptions{Lifetime: 934579384759374985}
+	lessThanHourLifetimeVideo := convert.ConversionOptions{Lifetime: 120}
+	moreThanMonthLifetimeVideo := convert.ConversionOptions{Lifetime: 934579384759374985}
 
 	testCases := []struct {
 		options  any
@@ -238,12 +159,7 @@ func TestValidateLifetime(t *testing.T) {
 				t.Fatalf("%s no context after ValidateLifetime", c.name)
 			}
 
-			switch context.(type) {
-			case convert.ConversionImageOptions:
-				checkedLifetime = context.(convert.ConversionImageOptions).Lifetime
-			case convert.ConversionVideoOptions:
-				checkedLifetime = context.(convert.ConversionVideoOptions).Lifetime
-			}
+			checkedLifetime = context.(convert.ConversionOptions).Lifetime
 
 			if c.correct && c.lifetime != checkedLifetime {
 				t.Fatalf("%s want %d, got %d", c.name, c.lifetime, checkedLifetime)

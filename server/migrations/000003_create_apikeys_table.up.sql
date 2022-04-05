@@ -3,6 +3,5 @@ CREATE TABLE apikeys(
     owneruuid VARCHAR(64) UNIQUE NOT NULL,
     key VARCHAR(64) UNIQUE NOT NULL,
     maxquotas INT NOT NULL,
-    quotas INT NOT NULL,
-    expired VARCHAR(255) NOT NULL
+    quotas INT NOT NULL
 );

@@ -47,7 +47,7 @@ func init() {
 	vopt.AddFunc("CompressionLevel", (*models.Mediafile).SetCompressionLevel)
 }
 
-func ConvertVideo(ifile string, options ConversionVideoOptions) (ofilename string, err error) {
+func ConvertVideo(ifile string, options ConversionOptions) (ofilename string, err error) {
 	fname := uuid.NewString()
 
 	ofilename = fmt.Sprintf("%s.%s", fname, options.Extension)
@@ -71,7 +71,7 @@ func ConvertVideo(ifile string, options ConversionVideoOptions) (ofilename strin
 	return
 }
 
-func ConvertImage(ifile string, options ConversionImageOptions) (ofilename string, err error) {
+func ConvertImage(ifile string, options ConversionOptions) (ofilename string, err error) {
 	fname := uuid.NewString()
 
 	ofilename = fmt.Sprintf("%s.%s", fname, options.Extension)

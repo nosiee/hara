@@ -83,14 +83,8 @@ func testSupportedFileFormat(t *testing.T, c contextCase, f func(*gin.Context)) 
 	rec := httptest.NewRecorder()
 	ctx, _ := gin.CreateTestContext(rec)
 
-	switch c.context.(type) {
-	case convert.ConversionImageOptions:
-		ctx.Set("options", c.context.(convert.ConversionImageOptions))
-		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionImageOptions).Extension})
-	case convert.ConversionVideoOptions:
-		ctx.Set("options", c.context.(convert.ConversionVideoOptions))
-		ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionVideoOptions).Extension})
-	}
+	ctx.Set("options", c.context.(convert.ConversionOptions))
+	ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionOptions).Extension})
 
 	f(ctx)
 

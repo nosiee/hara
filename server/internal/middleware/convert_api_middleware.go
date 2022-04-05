@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"encoding/json"
 	"fmt"
 	"hara/internal/convert"
 	"mime/multipart"
+	"net/url"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
@@ -15,12 +15,19 @@ const (
 	monthInSeconds = 2592000
 )
 
-func OptionsFieldProvided(ctx *gin.Context) {
-	if _, ok := ctx.GetPostForm("options"); !ok {
+func ConversionOptionsProvided(ctx *gin.Context) {
+	if u, err := url.ParseQuery(ctx.Request.URL.RawQuery); err != nil || len(u) == 0 {
 		ctx.AbortWithStatusJSON(400, gin.H{
-			"error": "Request cannot be processed. Options field not provided",
+			"error": "Request cannot be processed. Conversion options are not provided",
 		})
 	}
+}
+
+func ExtractConversionOptions(ctx *gin.Context) {
+	values, _ := url.ParseQuery(ctx.Request.URL.RawQuery)
+	options := convert.UrlQueryToOptions(values)
+
+	ctx.Set("options", options)
 }
 
 func FileFieldProvided(ctx *gin.Context) {
@@ -32,32 +39,6 @@ func FileFieldProvided(ctx *gin.Context) {
 	}
 
 	ctx.Set("file", f)
-}
-
-func ValidateVideoOptionsJson(ctx *gin.Context) {
-	var vopt convert.ConversionVideoOptions
-
-	optionsField, _ := ctx.GetPostForm("options")
-	if err := json.Unmarshal([]byte(optionsField), &vopt); err != nil {
-		ctx.AbortWithStatusJSON(400, gin.H{
-			"error": fmt.Sprintf("Request cannot be processed. %s", err),
-		})
-	}
-
-	ctx.Set("options", vopt)
-}
-
-func ValidateImageOptionsJson(ctx *gin.Context) {
-	var iopt convert.ConversionImageOptions
-
-	optionsField, _ := ctx.GetPostForm("options")
-	if err := json.Unmarshal([]byte(optionsField), &iopt); err != nil {
-		ctx.AbortWithStatusJSON(400, gin.H{
-			"error": fmt.Sprintf("Request cannot be processed. %s", err),
-		})
-	}
-
-	ctx.Set("options", iopt)
 }
 
 func SupportedVideoFileFormat(ctx *gin.Context) {
@@ -72,7 +53,7 @@ func SupportedVideoFileFormat(ctx *gin.Context) {
 		})
 	}
 
-	if !supportedFileRegexp.MatchString(vopt.(convert.ConversionVideoOptions).Extension) {
+	if !supportedFileRegexp.MatchString(vopt.(convert.ConversionOptions).Extension) {
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})
@@ -91,7 +72,7 @@ func SupportedImageFileFormat(ctx *gin.Context) {
 		})
 	}
 
-	if !supportedFileRegexp.MatchString(iopt.(convert.ConversionImageOptions).Extension) {
+	if !supportedFileRegexp.MatchString(iopt.(convert.ConversionOptions).Extension) {
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})
@@ -99,25 +80,12 @@ func SupportedImageFileFormat(ctx *gin.Context) {
 }
 
 func ValidateLifetime(ctx *gin.Context) {
-	options, _ := ctx.Get("options")
+	optField, _ := ctx.Get("options")
+	options := optField.(convert.ConversionOptions)
 
-	switch options.(type) {
-	case convert.ConversionImageOptions:
-		iopt := options.(convert.ConversionImageOptions)
+	if options.Lifetime < hourInSeconds || options.Lifetime > monthInSeconds {
+		options.Lifetime = hourInSeconds
 
-		if iopt.Lifetime < hourInSeconds || iopt.Lifetime > monthInSeconds {
-			iopt.Lifetime = hourInSeconds
-		}
-
-		ctx.Set("options", iopt)
-
-	case convert.ConversionVideoOptions:
-		vopt := options.(convert.ConversionVideoOptions)
-
-		if vopt.Lifetime < hourInSeconds || vopt.Lifetime > monthInSeconds {
-			vopt.Lifetime = hourInSeconds
-		}
-
-		ctx.Set("options", vopt)
+		ctx.Set("options", options)
 	}
 }

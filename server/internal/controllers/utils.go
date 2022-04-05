@@ -33,7 +33,7 @@ func GetFileContentType(reader io.Reader) (string, error) {
 }
 
 func GenerateJWT(uuid string, key string) (string, error) {
-	if len(key) != 64 {
+	if len(key) != HS512KeySize {
 		return "", jwt.ErrInvalidKey
 	}
 

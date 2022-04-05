@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"hara/internal/db"
 
 	"github.com/gin-gonic/gin"
@@ -29,5 +30,6 @@ func GetApiKey(ctx *gin.Context) {
 
 	ctx.JSON(200, gin.H{
 		"key": apiKey,
+		"url": fmt.Sprintf("http://localhost:8080/api/convert/video?key=%s", apiKey),
 	})
 }
