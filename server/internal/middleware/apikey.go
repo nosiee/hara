@@ -21,12 +21,14 @@ func ApiKeyProvided(ctx *gin.Context) {
 			"error": "api key is incorrect",
 		})
 	}
+
+	ctx.Set("apikey", query.Get("key"))
 }
 
 func ApiKeyValidate(ctx *gin.Context) {
-	query, _ := url.ParseQuery(ctx.Request.URL.RawQuery)
+	key, _ := ctx.Get("apikey")
 
-	if ok, err := db.IsKeyExists(query.Get("key")); !ok {
+	if ok, err := db.IsKeyExists(key.(string)); !ok {
 		ctx.AbortWithStatusJSON(401, gin.H{
 			"error": "api key is invalid",
 		})

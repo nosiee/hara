@@ -2,50 +2,50 @@ package middleware
 
 import (
 	"bytes"
-	"hara/internal/convert"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
-	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 )
 
-type requestCase struct {
-	request *http.Request
-	correct bool
-	name    string
-}
-
-type contextCase struct {
-	context any
-	correct bool
-	name    string
-}
-
 func init() {
 	gin.SetMode(gin.TestMode)
 }
 
-func createCookieRequest(method, cookie string) *http.Request {
-	req := httptest.NewRequest(method, "/", nil)
-	req.Header.Set("Cookie", cookie)
-	return req
+type contextCase struct {
+	context  *gin.Context
+	recorder *httptest.ResponseRecorder
+	correct  bool
+	name     string
 }
 
-func createFormRequest(f map[string]string, reqUrl string) *http.Request {
-	form := url.Values{}
+func createContextCase(context *gin.Context, recorder *httptest.ResponseRecorder, correct bool, name string) contextCase {
+	return contextCase{
+		context,
+		recorder,
+		correct,
+		name,
+	}
+}
 
-	for k, v := range f {
-		form.Add(k, v)
+func (c contextCase) checkCase(t *testing.T) {
+	if c.correct && c.recorder.Code != 200 {
+		t.Fatalf("%s want status code 200, got %d", c.name, c.recorder.Code)
 	}
 
-	req := httptest.NewRequest("POST", reqUrl, strings.NewReader(form.Encode()))
-	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	if !c.correct && c.recorder.Code == 200 {
+		t.Fatalf("%s want status code != 200, got 200", c.name)
+	}
+}
 
-	return req
+func createContextWithRequest(request *http.Request) (*gin.Context, *httptest.ResponseRecorder) {
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+	context.Request = request
+
+	return context, recorder
 }
 
 func createFileFormRequest(formField, formValue string) *http.Request {
@@ -59,40 +59,4 @@ func createFileFormRequest(formField, formValue string) *http.Request {
 	req.Header.Add("Content-Type", mw.FormDataContentType())
 
 	return req
-}
-
-func testRequest(t *testing.T, c requestCase, f func(*gin.Context)) *gin.Context {
-	rec := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(rec)
-	ctx.Request = c.request
-
-	f(ctx)
-
-	if c.correct && rec.Code != 200 {
-		t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-	}
-
-	if !c.correct && rec.Code == 200 {
-		t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-	}
-
-	return ctx
-}
-
-func testSupportedFileFormat(t *testing.T, c contextCase, f func(*gin.Context)) {
-	rec := httptest.NewRecorder()
-	ctx, _ := gin.CreateTestContext(rec)
-
-	ctx.Set("options", c.context.(convert.ConversionOptions))
-	ctx.Set("file", &multipart.FileHeader{Filename: c.context.(convert.ConversionOptions).Extension})
-
-	f(ctx)
-
-	if c.correct && rec.Code != 200 {
-		t.Fatalf("%s: want 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-	}
-
-	if !c.correct && rec.Code == 200 {
-		t.Fatalf("%s: want != 200, got %d, body %s", c.name, rec.Code, rec.Body.String())
-	}
 }

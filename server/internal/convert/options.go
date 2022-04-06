@@ -36,6 +36,11 @@ func (opt VideoOptionsMap) CallFunc(key string, m *models.Mediafile, value any) 
 			break
 		}
 		opt[key].(func(*models.Mediafile, uint))(m, value.(uint))
+	case uint64:
+		if value.(uint64) == 0 {
+			break
+		}
+		opt[key].(func(*models.Mediafile, uint))(m, value.(uint))
 	case bool:
 		if !value.(bool) {
 			break
@@ -58,13 +63,19 @@ func UrlQueryToOptions(values url.Values) ConversionOptions {
 			case string:
 				vof.Field(i).SetString(s)
 			case uint:
+				uv, err := strconv.ParseUint(s, 10, 32)
+				if err != nil {
+					continue
+				}
+				vof.Field(i).SetUint(uv)
+			case uint64:
 				uv, err := strconv.ParseUint(s, 10, 64)
 				if err != nil {
 					continue
 				}
 				vof.Field(i).SetUint(uv)
 			case int:
-				iv, err := strconv.ParseInt(s, 10, 64)
+				iv, err := strconv.ParseInt(s, 10, 32)
 				if err != nil {
 					continue
 				}
