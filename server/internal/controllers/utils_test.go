@@ -3,11 +3,14 @@ package controllers
 import (
 	"fmt"
 	"hara/internal/config"
+	"hara/internal/testhelpers"
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -15,45 +18,42 @@ func init() {
 }
 
 func TestGenerateFileUrl(t *testing.T) {
-	testCases := []struct {
-		proto     string
-		scheme    string
-		apiPrefix string
-		fpath     string
-		name      string
-	}{
-		{
-			"HTTP/1.1",
-			"http://",
-			"i",
-			"test_image.jpg",
-			"CorrectImageUrl",
-		},
-		{
-			"HTTP/2",
-			"https://",
-			"v",
-			"test_video.webm",
-			"CorrectVideoUrl",
-		},
+	testCases := []testhelpers.UrlCase{
+		testhelpers.CreateUrlCase("HTTP/1.1", "http://", "localhost:8080", "i", "test_image.jpg", "ImageUrl"),
+		testhelpers.CreateUrlCase("HTTP/2", "https://", "localhost:8080", "v", "test_video.webm", "VideoUrl"),
 	}
 
-	host := "localhost:8080"
+	for _, tc := range testCases {
+		t.Run(tc.Name, func(t *testing.T) {
+			fileUrl := fmt.Sprintf("%s%s/api/%s/%s", tc.Scheme, tc.Host, tc.ApiPrefix, tc.Value)
 
-	for _, c := range testCases {
-		t.Run(c.name, func(t *testing.T) {
-			fileUrl := fmt.Sprintf("%s%s/api/%s/%s", c.scheme, host, c.apiPrefix, c.fpath)
-			ctx, _ := gin.CreateTestContext(httptest.NewRecorder())
+			ctx, _ := testhelpers.CreateContextWithRequest(httptest.NewRequest("GET", fileUrl, nil))
+			ctx.Request.Proto = tc.Proto
 
-			ctx.Request = httptest.NewRequest("GET", fileUrl, nil)
-			ctx.Request.Proto = c.proto
-
-			url := GenerateFileUrl(ctx, c.apiPrefix, c.fpath)
-
+			url := GenerateFileUrl(ctx, tc.ApiPrefix, tc.Value)
 			if fileUrl != url {
-				t.Fatalf("%s want %s, got %s", c.name, fileUrl, url)
+				t.Fatalf("%s want %s, got %s", tc.Name, fileUrl, url)
 			}
 		})
+	}
+}
+
+func TestGenerateAPIUrl(t *testing.T) {
+	testCases := []testhelpers.UrlCase{
+		testhelpers.CreateUrlCase("HTTP/1.1", "http://", "localhost:8080", "image", uuid.NewString(), "ImageUrl"),
+		testhelpers.CreateUrlCase("HTTP/2", "https://", "localhost:8080", "video", uuid.NewString(), "VideoUrl"),
+	}
+
+	for _, tc := range testCases {
+		apiUrl := fmt.Sprintf("%s%s/api/convert/%s?key=%s", tc.Scheme, tc.Host, tc.ApiPrefix, tc.Value)
+
+		ctx, _ := testhelpers.CreateContextWithRequest(httptest.NewRequest("GET", apiUrl, nil))
+		ctx.Request.Proto = tc.Proto
+
+		url := GenerateAPIUrl(ctx, tc.ApiPrefix, tc.Value)
+		if apiUrl != url {
+			t.Fatalf("%s want %s, got %s", tc.Name, apiUrl, url)
+		}
 	}
 }
 
@@ -122,7 +122,7 @@ func TestGenerateJWT(t *testing.T) {
 
 	for _, c := range testCases {
 		t.Run(c.name, func(t *testing.T) {
-			_, err := GenerateJWT("someid", c.key)
+			_, err := GenerateJWT("someid", c.key, time.Now().Add(1*365*24*time.Hour).Unix())
 
 			if c.correct && err != nil {
 				t.Fatalf("%s want err == nil, got %v", c.name, err)
@@ -130,6 +130,65 @@ func TestGenerateJWT(t *testing.T) {
 
 			if !c.correct && err == nil {
 				t.Fatalf("%s want err != nil, got nil", c.name)
+			}
+		})
+	}
+}
+
+func TestExtractUserIDFromJWT(t *testing.T) {
+	config.LoadFromFile("../../testdata/configs/config_test_correct.toml")
+
+	id := uuid.NewString()
+	token, err := GenerateJWT(id, config.Values.HS512Key, time.Now().Add(1*365*24*time.Hour).Unix())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expToken, err := GenerateJWT(id, config.Values.HS512Key, 120)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testCases := []struct {
+		token   string
+		uuid    string
+		correct bool
+		name    string
+	}{
+		{
+			token,
+			id,
+			true,
+			"CorrectToken",
+		},
+		{
+			"definitelynotatoken",
+			id,
+			false,
+			"IncorrectToken",
+		},
+		{
+			expToken,
+			id,
+			false,
+			"ExpiredToken",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			id, err := ExtractUserIDFromJWT(tc.token)
+
+			if tc.correct && err != nil {
+				t.Fatalf("%s got %v", tc.name, err)
+			}
+
+			if !tc.correct && err == nil {
+				t.Fatalf("%s want err != nil", tc.name)
+			}
+
+			if tc.correct && (tc.uuid != id) {
+				t.Fatalf("%s want %s, got %s", tc.name, tc.uuid, id)
 			}
 		})
 	}

@@ -43,14 +43,14 @@ func GetFileContentType(reader io.Reader) (string, error) {
 	return contentType, nil
 }
 
-func GenerateJWT(uuid string, key string) (string, error) {
+func GenerateJWT(uuid string, key string, exp int64) (string, error) {
 	if len(key) != HS512KeySize {
 		return "", jwt.ErrInvalidKey
 	}
 
 	payload := jwt.MapClaims{}
 	payload["uuid"] = uuid
-	payload["exp"] = JWTExp
+	payload["exp"] = exp
 
 	header := jwt.NewWithClaims(jwt.SigningMethodHS512, payload)
 
@@ -58,17 +58,12 @@ func GenerateJWT(uuid string, key string) (string, error) {
 }
 
 func ExtractUserIDFromJWT(t string) (string, error) {
-	token, err := jwt.Parse(t, func(t *jwt.Token) (interface{}, error) {
+	claims := jwt.MapClaims{}
+
+	if _, err := jwt.ParseWithClaims(t, claims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(config.Values.HS512Key), nil
-	})
-
-	if err != nil {
+	}); err != nil {
 		return "", err
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok || !token.Valid {
-		return "", token.Claims.Valid()
 	}
 
 	return claims["uuid"].(string), nil

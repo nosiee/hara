@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"hara/internal/config"
 	"hara/internal/db"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -31,7 +32,9 @@ func SignUp(ctx *gin.Context) {
 		return
 	}
 
-	token, err := GenerateJWT(uuid, config.Values.HS512Key)
+	exp := time.Now().Add(1 * 365 * 24 * time.Hour).Unix()
+
+	token, err := GenerateJWT(uuid, config.Values.HS512Key, exp)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -39,7 +42,7 @@ func SignUp(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("jwt", token, int(JWTExp), "/", "", false, true)
+	ctx.SetCookie("jwt", token, int(exp), "/", "", false, true)
 	ctx.JSON(200, gin.H{
 		"message": "ok",
 	})
@@ -65,7 +68,9 @@ func SignIn(ctx *gin.Context) {
 		return
 	}
 
-	token, err := GenerateJWT(uuid, config.Values.HS512Key)
+	exp := time.Now().Add(1 * 365 * 24 * time.Hour).Unix()
+
+	token, err := GenerateJWT(uuid, config.Values.HS512Key, exp)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -73,7 +78,7 @@ func SignIn(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("jwt", token, int(JWTExp), "/", "", false, true)
+	ctx.SetCookie("jwt", token, int(exp), "/", "", false, true)
 	ctx.JSON(200, gin.H{
 		"message": "ok",
 	})

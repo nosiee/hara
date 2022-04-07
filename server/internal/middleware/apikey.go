@@ -36,3 +36,8 @@ func ApiKeyValidate(ctx *gin.Context) {
 		})
 	}
 }
+
+func ApiKeyQuotas(ctx *gin.Context) {
+	// TODO:
+	println("Not implemented yet")
+}
