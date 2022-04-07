@@ -1,15 +1,16 @@
 package db
 
 func AddNewApiKey(uuid, key string, quotas int) error {
-	_, err := db.Exec("INSERT INTO apikeys(owneruuid, key, maxquotas, quotas) VALUES($1, $2, $3, $4)", uuid, key, quotas, 0)
+	_, err := db.Exec("INSERT INTO apikeys(uuid, key, maxquotas, quotas) VALUES($1, $2, $3, $4)", uuid, key, quotas, 0)
 	return err
 }
 
-func UserHasKey(uuid string) (bool, error) {
+func UserHasKey(uuid string) (string, bool, error) {
 	var ID int
+	var key string
 
-	err := db.QueryRow("SELECT id FROM apikeys WHERE owneruuid=$1", uuid).Scan(&ID)
-	return ID != 0, err
+	err := db.QueryRow("SELECT id, key FROM apikeys WHERE uuid=$1", uuid).Scan(&ID, &key)
+	return key, ID != 0, err
 }
 
 func IsKeyExists(key string) (bool, error) {

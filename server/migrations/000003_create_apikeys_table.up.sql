@@ -1,6 +1,6 @@
 CREATE TABLE apikeys(
     ID SERIAL PRIMARY KEY,
-    owneruuid VARCHAR(64) UNIQUE NOT NULL,
+    uuid VARCHAR(64) UNIQUE NOT NULL,
     key VARCHAR(64) UNIQUE NOT NULL,
     maxquotas INT NOT NULL,
     quotas INT NOT NULL
