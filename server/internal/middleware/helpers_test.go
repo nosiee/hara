@@ -2,9 +2,12 @@ package middleware
 
 import (
 	"bytes"
+	"fmt"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -46,6 +49,24 @@ func createContextWithRequest(request *http.Request) (*gin.Context, *httptest.Re
 	context.Request = request
 
 	return context, recorder
+}
+
+func createFormRequest(form map[string]string) *http.Request {
+	data := url.Values{}
+
+	for k, v := range form {
+		data.Set(k, v)
+	}
+
+	req := httptest.NewRequest("POST", "/", strings.NewReader(data.Encode()))
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	return req
+}
+
+func createCookieRequest(cookieKey, cookieValue string) *http.Request {
+	req := httptest.NewRequest("POST", "/", nil)
+	req.Header.Set("Cookie", fmt.Sprintf("%s=%s", cookieKey, cookieValue))
+	return req
 }
 
 func createFileFormRequest(formField, formValue string) *http.Request {

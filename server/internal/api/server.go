@@ -12,8 +12,8 @@ var (
 )
 
 func RunServer(endpoint string) {
-	gen.POST("/api/auth/signup", middleware.AuthFormProvided, middleware.AuthFormValidate, controllers.SignUp)
-	gen.POST("/api/auth/signin", middleware.AuthFormValidate, middleware.AuthFormValidate, controllers.SignIn)
+	gen.POST("/api/auth/signup", middleware.SignUpFormProvided, middleware.SignUpFormValidate, controllers.SignUp)
+	gen.POST("/api/auth/signin", middleware.SignInFormProvided, middleware.SignInFormValidate, controllers.SignIn)
 
 	gen.GET("/api/key/get", middleware.IsAuthorized, controllers.GetApiKey)
 
