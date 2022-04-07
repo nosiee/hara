@@ -21,6 +21,17 @@ func GenerateFileUrl(ctx *gin.Context, apiPrefix, ofile string) string {
 	return fmt.Sprintf("%s%s/api/%s/%s", scheme, host, apiPrefix, ofile)
 }
 
+func GenerateAPIUrl(ctx *gin.Context, apiPrefix, key string) string {
+	scheme := "http://"
+	host := ctx.Request.Host
+
+	if ctx.Request.Proto == "HTTP/2" {
+		scheme = "https://"
+	}
+
+	return fmt.Sprintf("%s%s/api/convert/%s?key=%s", scheme, host, apiPrefix, key)
+}
+
 func GetFileContentType(reader io.Reader) (string, error) {
 	buffer := make([]byte, 512)
 
