@@ -124,9 +124,9 @@ func TestExtractConversionOptions(t *testing.T) {
 				t.Fatalf("%s extensions don't match", tc.Name)
 			}
 
-			lifetime, _ := strconv.ParseUint(values.Get("lifetime"), 10, 64)
+			lifetime, _ := strconv.ParseUint(values.Get("lifetime"), 10, 32)
 
-			if lifetime != options.(convert.ConversionOptions).Lifetime {
+			if uint(lifetime) != options.(convert.ConversionOptions).Lifetime {
 				t.Fatalf("%s lifetime don't match", tc.Name)
 			}
 		})
