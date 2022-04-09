@@ -7,15 +7,17 @@ import (
 	"hara/internal/models"
 	"mime/multipart"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func (c Controllers) ImageController(ctx *gin.Context) {
-	ioptIface, _ := ctx.Get("options")
+	optIface, _ := ctx.Get("options")
 	fileIface, _ := ctx.Get("file")
 
-	options := ioptIface.(convert.ConversionOptions)
+	options := optIface.(convert.ConversionOptions)
 	file := fileIface.(*multipart.FileHeader)
 	fpath := fmt.Sprintf("%s/%s", config.Values.UploadImagePath, file.Filename)
 
@@ -31,7 +33,7 @@ func (c Controllers) ImageController(ctx *gin.Context) {
 
 	os.Remove(fpath)
 
-	f := models.NewFile(ofile, "image", options.Lifetime)
+	f := models.NewFile(ofile, filepath.Join(config.Values.OutputImagePath, ofile), time.Now().Add(time.Duration(options.Lifetime)*time.Second).Unix())
 	if err = c.FileRepository.Add(f); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -74,10 +76,10 @@ func (c Controllers) GetImage(ctx *gin.Context) {
 }
 
 func (c Controllers) VideoController(ctx *gin.Context) {
-	voptIface, _ := ctx.Get("options")
+	optIface, _ := ctx.Get("options")
 	fileIface, _ := ctx.Get("file")
 
-	options := voptIface.(convert.ConversionOptions)
+	options := optIface.(convert.ConversionOptions)
 	file := fileIface.(*multipart.FileHeader)
 	fpath := fmt.Sprintf("%s/%s", config.Values.UploadVideoPath, file.Filename)
 
@@ -93,7 +95,7 @@ func (c Controllers) VideoController(ctx *gin.Context) {
 
 	os.Remove(fpath)
 
-	f := models.NewFile(ofile, "video", options.Lifetime)
+	f := models.NewFile(ofile, filepath.Join(config.Values.OutputVideoPath, ofile), time.Now().Add(time.Duration(options.Lifetime)*time.Second).Unix())
 	if err = c.FileRepository.Add(f); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),

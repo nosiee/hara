@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS lifetimes;
+DROP TABLE IF EXISTS files;

@@ -27,7 +27,6 @@ func ApiKeyValidate(apikeyRepo models.ApiKeyRepository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		query, _ := url.ParseQuery(ctx.Request.URL.RawQuery)
 
-		// NOTE: Should we use db in middelware? It's not very convenient for testing.
 		if ok, err := apikeyRepo.IsExists(query.Get("key")); !ok {
 			ctx.AbortWithStatusJSON(401, gin.H{
 				"error": "api key is invalid",

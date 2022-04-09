@@ -1,9 +1,9 @@
 package models
 
 type File struct {
-	Filename string
-	Filetype string
-	Lifetime uint
+	Filename        string
+	Fullpath        string
+	Deletetimestamp int64
 }
 
 type FileRepository interface {
@@ -11,10 +11,10 @@ type FileRepository interface {
 	IsExists(filename string) bool
 }
 
-func NewFile(fname, filetype string, lifetime uint) File {
+func NewFile(fname, fullpath string, ts int64) File {
 	return File{
 		fname,
-		filetype,
-		lifetime,
+		fullpath,
+		ts,
 	}
 }

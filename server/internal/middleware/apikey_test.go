@@ -28,6 +28,5 @@ func TestApiKeyProvided(t *testing.T) {
 }
 
 func TestApiKeyValidate(t *testing.T) {
-	// TODO: We need to find a way to use mock db instead of real postgresql
 	println("Not implemented yet")
 }
