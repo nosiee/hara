@@ -1,11 +1,15 @@
 package main
 
 import (
+	"database/sql"
 	"flag"
 	"hara/internal/api"
 	"hara/internal/config"
-	"hara/internal/db"
+	"hara/internal/controllers"
+	"hara/internal/repository"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -31,9 +35,17 @@ func main() {
 		}
 	}
 
-	if err := db.Connnect(config.Values.DatabaseURL); err != nil {
+	db, err := sql.Open("postgres", config.Values.DatabaseURL)
+	if err != nil {
 		panic(err)
 	}
 
-	api.RunServer(config.Values.APIEndPoint)
+	userRepo := repository.NewUserRepository(db)
+	fileRepo := repository.NewFileRepository(db)
+	apikeyRepo := repository.NewApiKeyRepository(db)
+
+	controllers := controllers.NewControllers(userRepo, fileRepo, apikeyRepo)
+
+	server := api.NewServer(controllers)
+	server.RunServer(config.Values.APIEndPoint)
 }

@@ -2,7 +2,7 @@ package convert
 
 type ConversionOptions struct {
 	Extension        string `option:"ext"`
-	Lifetime         uint64 `option:"lifetime"`
+	Lifetime         uint   `option:"lifetime"`
 	Width            uint   `option:"width"`
 	Height           uint   `option:"height"`
 	Quality          uint   `option:"quality"`

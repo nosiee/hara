@@ -2,15 +2,14 @@ package controllers
 
 import (
 	"database/sql"
-	"hara/internal/db"
+	"hara/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-func GetApiKey(ctx *gin.Context) {
+func (c Controllers) GetApiKey(ctx *gin.Context) {
 	token, _ := ctx.Cookie("jwt")
-
 	id, err := ExtractUserIDFromJWT(token)
 	if err != nil {
 		ctx.JSON(400, gin.H{
@@ -19,7 +18,7 @@ func GetApiKey(ctx *gin.Context) {
 		return
 	}
 
-	key, ok, err := db.UserHasKey(id)
+	ok, err := c.ApikeyRepository.UserHaveKey(id)
 	if err != nil && err != sql.ErrNoRows {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -28,13 +27,13 @@ func GetApiKey(ctx *gin.Context) {
 	} else if ok {
 		ctx.JSON(400, gin.H{
 			"error": "You already have a key",
-			"key":   key,
 		})
 		return
 	}
 
-	apiKey := uuid.NewString()
-	if err = db.AddNewApiKey(id, apiKey, 100); err != nil {
+	apikey := models.NewApiKey(id, uuid.NewString(), 100, 0)
+
+	if err = c.ApikeyRepository.Add(apikey); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -42,8 +41,8 @@ func GetApiKey(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, gin.H{
-		"vid-url": GenerateAPIUrl(ctx, "video", apiKey),
-		"img-url": GenerateAPIUrl(ctx, "image", apiKey),
-		"key":     apiKey,
+		"video-url": GenerateAPIUrl(ctx, "video", apikey.Key),
+		"image-url": GenerateAPIUrl(ctx, "image", apikey.Key),
+		"key":       apikey.Key,
 	})
 }

@@ -4,25 +4,24 @@ import (
 	"fmt"
 	"hara/internal/config"
 	"hara/internal/convert"
-	"hara/internal/db"
+	"hara/internal/models"
 	"mime/multipart"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
-func ImageController(ctx *gin.Context) {
+func (c Controllers) ImageController(ctx *gin.Context) {
 	ioptIface, _ := ctx.Get("options")
 	fileIface, _ := ctx.Get("file")
 
-	iopt := ioptIface.(convert.ConversionOptions)
+	options := ioptIface.(convert.ConversionOptions)
 	file := fileIface.(*multipart.FileHeader)
 	fpath := fmt.Sprintf("%s/%s", config.Values.UploadImagePath, file.Filename)
 
 	ctx.SaveUploadedFile(file, fpath)
 
-	ofile, err := convert.ConvertImage(fpath, iopt)
+	ofile, err := convert.ConvertImage(fpath, options)
 	if err != nil {
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),
@@ -31,8 +30,9 @@ func ImageController(ctx *gin.Context) {
 	}
 
 	os.Remove(fpath)
-	deleteDate := time.Now().Add(time.Duration(iopt.Lifetime) * time.Second)
-	if err = db.AddFileLifetime(ofile, "image", deleteDate.Format(time.RFC3339)); err != nil {
+
+	f := models.NewFile(ofile, "image", options.Lifetime)
+	if err = c.FileRepository.Add(f); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -42,11 +42,11 @@ func ImageController(ctx *gin.Context) {
 	ctx.String(200, GenerateFileUrl(ctx, "i", ofile))
 }
 
-func GetImage(ctx *gin.Context) {
+func (c Controllers) GetImage(ctx *gin.Context) {
 	fname := ctx.Param("filename")
 	fpath := fmt.Sprintf("%s/%s", config.Values.OutputImagePath, fname)
 
-	if ok := db.IsFileExists(fname); !ok {
+	if ok := c.FileRepository.IsExists(fname); !ok {
 		ctx.JSON(404, gin.H{
 			"error": "File not found",
 		})
@@ -73,17 +73,17 @@ func GetImage(ctx *gin.Context) {
 	ctx.File(fpath)
 }
 
-func VideoController(ctx *gin.Context) {
+func (c Controllers) VideoController(ctx *gin.Context) {
 	voptIface, _ := ctx.Get("options")
 	fileIface, _ := ctx.Get("file")
 
-	vopt := voptIface.(convert.ConversionOptions)
+	options := voptIface.(convert.ConversionOptions)
 	file := fileIface.(*multipart.FileHeader)
 	fpath := fmt.Sprintf("%s/%s", config.Values.UploadVideoPath, file.Filename)
 
 	ctx.SaveUploadedFile(file, fpath)
 
-	ofile, err := convert.ConvertVideo(fpath, vopt)
+	ofile, err := convert.ConvertVideo(fpath, options)
 	if err != nil {
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),
@@ -92,8 +92,9 @@ func VideoController(ctx *gin.Context) {
 	}
 
 	os.Remove(fpath)
-	deleteDate := time.Now().Add(time.Duration(vopt.Lifetime) * time.Second)
-	if err = db.AddFileLifetime(ofile, "video", deleteDate.Format(time.RFC3339)); err != nil {
+
+	f := models.NewFile(ofile, "video", options.Lifetime)
+	if err = c.FileRepository.Add(f); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -103,11 +104,11 @@ func VideoController(ctx *gin.Context) {
 	ctx.String(200, GenerateFileUrl(ctx, "v", ofile))
 }
 
-func GetVideo(ctx *gin.Context) {
+func (c Controllers) GetVideo(ctx *gin.Context) {
 	fname := ctx.Param("filename")
 	fpath := fmt.Sprintf("%s/%s", config.Values.OutputVideoPath, fname)
 
-	if ok := db.IsFileExists(fname); !ok {
+	if ok := c.FileRepository.IsExists(fname); !ok {
 		ctx.JSON(404, gin.H{
 			"error": "File not found",
 		})

@@ -53,6 +53,7 @@ func CreateUrlCase(proto, scheme, host, apiPrefix, value, name string) UrlCase {
 	}
 }
 
+// TODO: From outside it's not obvious how test is checked, so it's probably a bad idea
 func (c ContextCase) CheckCase(t *testing.T) {
 	if c.Correct && c.Recorder.Code != 200 {
 		t.Fatalf("%s want status code 200, got %d", c.Name, c.Recorder.Code)

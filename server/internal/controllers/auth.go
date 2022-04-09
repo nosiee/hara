@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/hex"
 	"hara/internal/config"
-	"hara/internal/db"
+	"hara/internal/models"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func SignUp(ctx *gin.Context) {
+func (c Controllers) SignUp(ctx *gin.Context) {
 	username, _ := ctx.GetPostForm("username")
 	password, _ := ctx.GetPostForm("password")
 	email, _ := ctx.GetPostForm("email")
@@ -25,7 +25,8 @@ func SignUp(ctx *gin.Context) {
 		return
 	}
 
-	if err := db.CreateNewUser(uuid, username, hex.EncodeToString(hash[:]), email); err != nil {
+	user := models.NewUser(uuid, username, hex.EncodeToString(hash[:]), email)
+	if err := c.UserRepository.Create(user); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -48,19 +49,19 @@ func SignUp(ctx *gin.Context) {
 	})
 }
 
-func SignIn(ctx *gin.Context) {
+func (c Controllers) SignIn(ctx *gin.Context) {
 	username, _ := ctx.GetPostForm("username")
 	password, _ := ctx.GetPostForm("password")
 
-	uuid, hash, ok := db.FindUser(username)
-	if !ok {
+	user := c.UserRepository.FindByUsername(username)
+	if user == nil {
 		ctx.JSON(401, gin.H{
 			"error": "Username or password is incorrect",
 		})
 		return
 	}
 
-	decodedHash, _ := hex.DecodeString(hash)
+	decodedHash, _ := hex.DecodeString(user.Hash)
 	if err := bcrypt.CompareHashAndPassword(decodedHash, []byte(password)); err != nil {
 		ctx.JSON(401, gin.H{
 			"error": "Username or password is incorrect",
@@ -70,7 +71,7 @@ func SignIn(ctx *gin.Context) {
 
 	exp := time.Now().Add(1 * 365 * 24 * time.Hour).Unix()
 
-	token, err := GenerateJWT(uuid, config.Values.HS512Key, exp)
+	token, err := GenerateJWT(user.UUID, config.Values.HS512Key, exp)
 	if err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
