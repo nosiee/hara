@@ -28,13 +28,13 @@ func ApiKeyValidate(apikeyRepo models.ApiKeyRepository) func(*gin.Context) {
 	return func(ctx *gin.Context) {
 		query, _ := url.ParseQuery(ctx.Request.URL.RawQuery)
 
-		if ok, err := apikeyRepo.IsExists(query.Get("key")); !ok {
+		if ok, err := apikeyRepo.IsExists(query.Get("key")); err != nil {
+			ctx.AbortWithStatusJSON(500, gin.H{
+				"error": err.Error(),
+			})
+		} else if !ok {
 			ctx.AbortWithStatusJSON(401, gin.H{
 				"error": "api key is invalid",
-			})
-		} else if err != nil {
-			ctx.AbortWithStatusJSON(401, gin.H{
-				"error": err.Error(),
 			})
 		}
 	}
@@ -55,7 +55,7 @@ func ApiKeyQuota(apikeyRepo models.ApiKeyRepository) func(*gin.Context) {
 
 		if ut > 0 {
 			ctx.AbortWithStatusJSON(400, gin.H{
-				"error": "Quota is reached",
+				"error": "Quota has been exceeded",
 			})
 			return
 		}
@@ -69,14 +69,23 @@ func ApiKeyQuota(apikeyRepo models.ApiKeyRepository) func(*gin.Context) {
 		}
 
 		if quota < maxquota {
-			apikeyRepo.IncrementQuota(key)
+			if err := apikeyRepo.IncrementQuota(key); err != nil {
+				ctx.AbortWithStatusJSON(500, gin.H{
+					"error": err.Error(),
+				})
+			}
 			return
 		}
 
-		apikeyRepo.SetUpdatetime(key, time.Now().Add(24*time.Hour).Unix())
+		if err := apikeyRepo.SetUpdatetime(key, time.Now().Add(24*time.Hour).Unix()); err != nil {
+			ctx.AbortWithStatusJSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
 		ctx.AbortWithStatusJSON(400, gin.H{
-			"error": "Quota is reached",
+			"error": "Quota has been exceeded",
 		})
-		return
 	}
 }
