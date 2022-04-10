@@ -27,13 +27,13 @@ func (serv Server) RunServer(endpoint string) {
 
 	serv.engine.POST("/api/convert/image",
 		middleware.ApiKeyProvided, middleware.ApiKeyValidate(serv.controllers.ApikeyRepository),
-		middleware.ApiKeyQuotas, middleware.ExtractConversionOptions,
+		middleware.ApiKeyQuota(serv.controllers.ApikeyRepository), middleware.ExtractConversionOptions,
 		middleware.ImageFileFieldProvided, middleware.SupportedImageFileExtension,
 		middleware.ValidateLifetime, serv.controllers.ImageController)
 
 	serv.engine.POST("/api/convert/video",
 		middleware.ApiKeyProvided, middleware.ApiKeyValidate(serv.controllers.ApikeyRepository),
-		middleware.ApiKeyQuotas, middleware.ExtractConversionOptions,
+		middleware.ApiKeyQuota(serv.controllers.ApikeyRepository), middleware.ExtractConversionOptions,
 		middleware.VideoFileFieldProvided, middleware.SupportedVideoFileExtension,
 		middleware.ValidateLifetime, serv.controllers.VideoController)
 

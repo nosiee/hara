@@ -2,7 +2,9 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"hara/internal/models"
+	"time"
 )
 
 type ApiKeyRepository struct {
@@ -16,11 +18,11 @@ func NewApiKeyRepository(db *sql.DB) *ApiKeyRepository {
 }
 
 func (repo ApiKeyRepository) Add(key models.ApiKey) error {
-	_, err := repo.db.Exec("INSERT INTO apikeys(uuid, key, maxquotas, quotas) VALUES($1, $2, $3, $4)", key.OwnerUUID, key.Key, key.MaxQuotas, key.Quotas)
+	_, err := repo.db.Exec("INSERT INTO apikeys(uuid, key, maxquota, quota, updatetime) VALUES($1, $2, $3, $4, $5)", key.OwnerUUID, key.Key, key.MaxQuota, key.Quota, key.Updatetime)
 	return err
 }
 
-func (repo ApiKeyRepository) UserHaveKey(uuid string) (bool, error) {
+func (repo ApiKeyRepository) UserHasKey(uuid string) (bool, error) {
 	var ID int
 	var key string
 
@@ -33,4 +35,65 @@ func (repo ApiKeyRepository) IsExists(key string) (bool, error) {
 
 	err := repo.db.QueryRow("SELECT id FROM apikeys WHERE key=$1", key).Scan(&ID)
 	return ID != 0, err
+}
+
+func (repo ApiKeyRepository) GetQuota(key string) (uint, uint, error) {
+	var maxquota, quota uint
+
+	err := repo.db.QueryRow("SELECT maxquota,quota FROM apikeys WHERE key=$1", key).Scan(&maxquota, &quota)
+	return maxquota, quota, err
+}
+
+func (repo ApiKeyRepository) IncrementQuota(key string) error {
+	_, err := repo.db.Exec("UPDATE apikeys SET quota = quota + 1 WHERE key=$1", key)
+	return err
+}
+
+func (repo ApiKeyRepository) SetQuota(key string, quota uint) error {
+	_, err := repo.db.Exec("UPDATE apikeys SET quota = $1 WHERE key=$2", quota, key)
+	return err
+}
+
+func (repo ApiKeyRepository) SetUpdatetime(key string, time int64) error {
+	_, err := repo.db.Exec("UPDATE apikeys SET updatetime = $1 WHERE key = $2", time, key)
+	return err
+}
+
+func (repo ApiKeyRepository) GetUpdatetime(key string) (int64, error) {
+	var updatetime int64
+
+	err := repo.db.QueryRow("SELECT updatetime FROM apikeys WHERE key = $1", key).Scan(&updatetime)
+	return updatetime, err
+}
+
+func (repo ApiKeyRepository) UpdateAllQuota() {
+	var updatetime int64
+	var key string
+
+	for {
+		rows, err := repo.db.Query("SELECT key, updatetime FROM apikeys")
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		for rows.Next() {
+			rows.Scan(&key, &updatetime)
+
+			now := time.Now().Unix()
+			if now >= updatetime && updatetime > 0 {
+				if err := repo.SetQuota(key, 0); err != nil {
+					fmt.Println(err)
+					continue
+				}
+
+				if err := repo.SetUpdatetime(key, 0); err != nil {
+					fmt.Println(err)
+					continue
+				}
+			}
+		}
+
+		time.Sleep(time.Hour)
+	}
 }

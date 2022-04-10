@@ -3,6 +3,7 @@ package middleware
 import (
 	"hara/internal/models"
 	"net/url"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -39,7 +40,43 @@ func ApiKeyValidate(apikeyRepo models.ApiKeyRepository) func(*gin.Context) {
 	}
 }
 
-func ApiKeyQuotas(ctx *gin.Context) {
-	// TODO:
-	println("Not implemented yet")
+func ApiKeyQuota(apikeyRepo models.ApiKeyRepository) func(*gin.Context) {
+	return func(ctx *gin.Context) {
+		query, _ := url.ParseQuery(ctx.Request.URL.RawQuery)
+		key := query.Get("key")
+
+		ut, err := apikeyRepo.GetUpdatetime(key)
+		if err != nil {
+			ctx.AbortWithStatusJSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		if ut > 0 {
+			ctx.AbortWithStatusJSON(400, gin.H{
+				"error": "Quota is reached",
+			})
+			return
+		}
+
+		maxquota, quota, err := apikeyRepo.GetQuota(key)
+		if err != nil {
+			ctx.AbortWithStatusJSON(500, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		if quota < maxquota {
+			apikeyRepo.IncrementQuota(key)
+			return
+		}
+
+		apikeyRepo.SetUpdatetime(key, time.Now().Add(24*time.Hour).Unix())
+		ctx.AbortWithStatusJSON(400, gin.H{
+			"error": "Quota is reached",
+		})
+		return
+	}
 }

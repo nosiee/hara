@@ -19,7 +19,7 @@ func NewFileRepository(db *sql.DB) *FileRepository {
 }
 
 func (repo FileRepository) Add(file models.File) error {
-	_, err := repo.db.Exec("INSERT INTO files(filename,fullpath,deletetimestamp) VALUES($1, $2, $3)", file.Filename, file.Fullpath, file.Deletetimestamp)
+	_, err := repo.db.Exec("INSERT INTO files(filename,fullpath,deletetime) VALUES($1, $2, $3)", file.Filename, file.Fullpath, file.Deletetime)
 	return err
 }
 
@@ -30,22 +30,21 @@ func (repo FileRepository) IsExists(filename string) bool {
 }
 
 func (repo FileRepository) DeleteExpired() {
-	var ID, deleteTimestamp int64
+	var ID, deletetime int64
 	var fullpath string
 
 	for {
-		rows, err := repo.db.Query("SELECT id,fullpath,deletetimestamp FROM files")
+		rows, err := repo.db.Query("SELECT id,fullpath,deletetime FROM files")
 		if err != nil {
 			fmt.Println(err)
-			return
+			continue
 		}
 
 		for rows.Next() {
-			rows.Scan(&ID, &fullpath, &deleteTimestamp)
+			rows.Scan(&ID, &fullpath, &deletetime)
 
 			now := time.Now().Unix()
-			println(now, deleteTimestamp, now >= deleteTimestamp)
-			if now >= deleteTimestamp {
+			if now >= deletetime {
 				repo.db.Exec("DELETE FROM files where id=$1", ID)
 				os.Remove(fullpath)
 			}

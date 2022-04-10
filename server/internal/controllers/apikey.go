@@ -18,7 +18,7 @@ func (c Controllers) GetApiKey(ctx *gin.Context) {
 		return
 	}
 
-	ok, err := c.ApikeyRepository.UserHaveKey(id)
+	ok, err := c.ApikeyRepository.UserHasKey(id)
 	if err != nil && err != sql.ErrNoRows {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -31,7 +31,7 @@ func (c Controllers) GetApiKey(ctx *gin.Context) {
 		return
 	}
 
-	apikey := models.NewApiKey(id, uuid.NewString(), 100, 0)
+	apikey := models.NewApiKey(id, uuid.NewString(), 100, 0, 0)
 
 	if err = c.ApikeyRepository.Add(apikey); err != nil {
 		ctx.JSON(500, gin.H{

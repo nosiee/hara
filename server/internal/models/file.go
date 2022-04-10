@@ -1,9 +1,9 @@
 package models
 
 type File struct {
-	Filename        string
-	Fullpath        string
-	Deletetimestamp int64
+	Filename   string
+	Fullpath   string
+	Deletetime int64
 }
 
 type FileRepository interface {

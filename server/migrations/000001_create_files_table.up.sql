@@ -1,6 +1,6 @@
 CREATE TABLE files (
     ID  SERIAL PRIMARY KEY,
-    Filename VARCHAR(255),
-    Fullpath VARCHAR(255),
-    Deletetimestamp INT
+    filename VARCHAR(255) UNIQUE NOT NULL,
+    fullpath VARCHAR(255) UNIQUE NOT NULL,
+    deletetime INT NOT NULL
 );

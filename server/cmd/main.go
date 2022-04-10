@@ -45,7 +45,9 @@ func main() {
 	apikeyRepo := repository.NewApiKeyRepository(db)
 
 	controllers := controllers.NewControllers(userRepo, fileRepo, apikeyRepo)
+
 	go fileRepo.DeleteExpired()
+	go apikeyRepo.UpdateAllQuota()
 
 	server := api.NewServer(controllers)
 	server.RunServer(config.Values.APIEndPoint)
