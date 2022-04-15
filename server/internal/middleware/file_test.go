@@ -10,9 +10,9 @@ import (
 )
 
 func TestImageFileFieldProvided(t *testing.T) {
-	correctImgCtx, correctImgRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFileFormRequest("file", "1.jpg"))
-	incorrectImgExtCtx, incorrectImgExtRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFileFormRequest("file", "1.exe"))
-	incorrectImgFieldCtx, incorrectImgFieldRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFileFormRequest("not_file", "1.jpg"))
+	correctImgCtx, correctImgRec := testhelpers.CreateContext(testhelpers.CreateFileFormRequest("file", "1.jpg"), nil)
+	incorrectImgExtCtx, incorrectImgExtRec := testhelpers.CreateContext(testhelpers.CreateFileFormRequest("file", "1.exe"), nil)
+	incorrectImgFieldCtx, incorrectImgFieldRec := testhelpers.CreateContext(testhelpers.CreateFileFormRequest("not_file", "1.jpg"), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctImgCtx, correctImgRec, true, "CorrectImageExtension"),
@@ -29,9 +29,9 @@ func TestImageFileFieldProvided(t *testing.T) {
 }
 
 func TestVideoFileFieldProvided(t *testing.T) {
-	correctVidCtx, correctVidRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFileFormRequest("file", "1.mp4"))
-	incorrectVidExtCtx, incorrectVidExtRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFileFormRequest("file", "1.exe"))
-	incorrectVidFieldCtx, incorrectVidFieldRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFileFormRequest("not_file", "1.mp4"))
+	correctVidCtx, correctVidRec := testhelpers.CreateContext(testhelpers.CreateFileFormRequest("file", "1.mp4"), nil)
+	incorrectVidExtCtx, incorrectVidExtRec := testhelpers.CreateContext(testhelpers.CreateFileFormRequest("file", "1.exe"), nil)
+	incorrectVidFieldCtx, incorrectVidFieldRec := testhelpers.CreateContext(testhelpers.CreateFileFormRequest("not_file", "1.mp4"), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctVidCtx, correctVidRec, true, "CorrectVideoExtension"),
@@ -48,8 +48,8 @@ func TestVideoFileFieldProvided(t *testing.T) {
 }
 
 func TestSupportedImageFileExtension(t *testing.T) {
-	correctImgCtx, correctImgRec := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=jpg", nil))
-	incorrectImgCtx, incorrectImgRec := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=exe", nil))
+	correctImgCtx, correctImgRec := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=jpg", nil), nil)
+	incorrectImgCtx, incorrectImgRec := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=exe", nil), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctImgCtx, correctImgRec, true, "CorrectImageExtension"),
@@ -65,8 +65,8 @@ func TestSupportedImageFileExtension(t *testing.T) {
 }
 
 func TestSupportedVideoFileExtension(t *testing.T) {
-	correctVidCtx, correctVidRec := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/convert/video?key=apikey&ext=mp4", nil))
-	incorrectVidCtx, incorrectVidRec := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/convert/video?key=apikey&ext=exe", nil))
+	correctVidCtx, correctVidRec := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/convert/video?key=apikey&ext=mp4", nil), nil)
+	incorrectVidCtx, incorrectVidRec := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/convert/video?key=apikey&ext=exe", nil), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctVidCtx, correctVidRec, true, "CorrectVideoExtension"),
@@ -82,9 +82,9 @@ func TestSupportedVideoFileExtension(t *testing.T) {
 }
 
 func TestValidateLifetime(t *testing.T) {
-	correctLifetimeCtx, correctLifetimeRec := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=jpg&lifetime=3600", nil))
-	incorrectLifetimeCtx, incorrectLifetimeRec := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=jpg&lifetime=120", nil))
-	withoutLifetimeCtx, withoutLifetimeRec := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=jpg", nil))
+	correctLifetimeCtx, correctLifetimeRec := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=jpg&lifetime=3600", nil), nil)
+	incorrectLifetimeCtx, incorrectLifetimeRec := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=jpg&lifetime=120", nil), nil)
+	withoutLifetimeCtx, withoutLifetimeRec := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/convert/image?key=apikey&ext=jpg", nil), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctLifetimeCtx, correctLifetimeRec, true, "CorrectLifetime"),
@@ -101,8 +101,8 @@ func TestValidateLifetime(t *testing.T) {
 }
 
 func TestExtractConversionOptions(t *testing.T) {
-	imageOptionsCtx, _ := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/covert/image?key=apikey&ext=jpg&lifetime=3600", nil))
-	videoOptionsCtx, _ := testhelpers.CreateContextWithRequest(httptest.NewRequest("POST", "http://localhost:8080/api/covert/video?key=apikey&ext=mp4&lifetime=4800", nil))
+	imageOptionsCtx, _ := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/covert/image?key=apikey&ext=jpg&lifetime=3600", nil), nil)
+	videoOptionsCtx, _ := testhelpers.CreateContext(httptest.NewRequest("POST", "http://localhost:8080/api/covert/video?key=apikey&ext=mp4&lifetime=4800", nil), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(imageOptionsCtx, nil, true, "ImageOptions"),

@@ -27,7 +27,7 @@ func TestGenerateFileUrl(t *testing.T) {
 		t.Run(tc.Name, func(t *testing.T) {
 			fileUrl := fmt.Sprintf("%s%s/api/%s/%s", tc.Scheme, tc.Host, tc.ApiPrefix, tc.Value)
 
-			ctx, _ := testhelpers.CreateContextWithRequest(httptest.NewRequest("GET", fileUrl, nil))
+			ctx, _ := testhelpers.CreateContext(httptest.NewRequest("GET", fileUrl, nil), nil)
 			ctx.Request.Proto = tc.Proto
 
 			url := GenerateFileUrl(ctx, tc.ApiPrefix, tc.Value)
@@ -47,7 +47,7 @@ func TestGenerateAPIUrl(t *testing.T) {
 	for _, tc := range testCases {
 		apiUrl := fmt.Sprintf("%s%s/api/convert/%s?key=%s", tc.Scheme, tc.Host, tc.ApiPrefix, tc.Value)
 
-		ctx, _ := testhelpers.CreateContextWithRequest(httptest.NewRequest("GET", apiUrl, nil))
+		ctx, _ := testhelpers.CreateContext(httptest.NewRequest("GET", apiUrl, nil), nil)
 		ctx.Request.Proto = tc.Proto
 
 		url := GenerateAPIUrl(ctx, tc.ApiPrefix, tc.Value)

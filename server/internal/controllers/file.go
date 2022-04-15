@@ -23,7 +23,8 @@ func (c Controllers) ImageController(ctx *gin.Context) {
 
 	ctx.SaveUploadedFile(file, fpath)
 
-	ofile, err := convert.ConvertImage(fpath, options)
+	// TODO: Looks like we need to mock converter
+	ofile, err := c.Converter.ConvertImage(fpath, options)
 	if err != nil {
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),
@@ -85,7 +86,8 @@ func (c Controllers) VideoController(ctx *gin.Context) {
 
 	ctx.SaveUploadedFile(file, fpath)
 
-	ofile, err := convert.ConvertVideo(fpath, options)
+	// TODO: Looks like we need to mock converter
+	ofile, err := c.Converter.ConvertVideo(fpath, options)
 	if err != nil {
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),

@@ -64,10 +64,14 @@ func (c ContextCase) CheckCase(t *testing.T) {
 	}
 }
 
-func CreateContextWithRequest(request *http.Request) (*gin.Context, *httptest.ResponseRecorder) {
+func CreateContext(request *http.Request, options map[string]any) (*gin.Context, *httptest.ResponseRecorder) {
 	recorder := httptest.NewRecorder()
 	context, _ := gin.CreateTestContext(recorder)
 	context.Request = request
+
+	for k, v := range options {
+		context.Set(k, v)
+	}
 
 	return context, recorder
 }

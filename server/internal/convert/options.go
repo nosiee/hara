@@ -9,13 +9,13 @@ import (
 	"github.com/xfrr/goffmpeg/models"
 )
 
-type VideoOptionsMap map[string]any
+type VideoOptions map[string]any
 
-func (opt VideoOptionsMap) AddFunc(key string, f any) {
+func (opt VideoOptions) AddFunc(key string, f any) {
 	opt[key] = f
 }
 
-func (opt VideoOptionsMap) CallFunc(key string, m *models.Mediafile, value any) {
+func (opt VideoOptions) CallFunc(key string, m *models.Mediafile, value any) {
 	if _, ok := opt[key]; !ok {
 		return
 	}

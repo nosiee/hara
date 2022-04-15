@@ -9,26 +9,26 @@ import (
 )
 
 func TestSignUpFormProvided(t *testing.T) {
-	correctFormCtx, correctFormRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	correctFormCtx, correctFormRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"password": "123456789",
 		"email":    "nosiee@example.com",
-	}))
+	}), nil)
 
-	withoutUsernameCtx, withoutUsernameRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	withoutUsernameCtx, withoutUsernameRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"password": "123456789",
 		"email":    "nosiee@example.com",
-	}))
+	}), nil)
 
-	withoutPasswordCtx, withoutPasswordRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	withoutPasswordCtx, withoutPasswordRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"email":    "nosiee@example.com",
-	}))
+	}), nil)
 
-	withoutEmailCtx, withoutEmailRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	withoutEmailCtx, withoutEmailRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"password": "123456789",
-	}))
+	}), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctFormCtx, correctFormRec, true, "CorrectForm"),
@@ -46,18 +46,18 @@ func TestSignUpFormProvided(t *testing.T) {
 }
 
 func TestSignInFormProvided(t *testing.T) {
-	correctFormCtx, correctFormRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	correctFormCtx, correctFormRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"password": "123456789",
-	}))
+	}), nil)
 
-	withoutUsernameCtx, withoutUsernameRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	withoutUsernameCtx, withoutUsernameRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"password": "123456789",
-	}))
+	}), nil)
 
-	withoutPasswordCtx, withoutPasswordRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	withoutPasswordCtx, withoutPasswordRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
-	}))
+	}), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctFormCtx, correctFormRec, true, "CorrectForm"),
@@ -74,29 +74,29 @@ func TestSignInFormProvided(t *testing.T) {
 }
 
 func TestSignUpFormValidate(t *testing.T) {
-	correctFormCtx, correctFormRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	correctFormCtx, correctFormRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"password": "123456789",
 		"email":    "nosiee@example.com",
-	}))
+	}), nil)
 
-	incorrectUsernameCtx, incorrectUsernameRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	incorrectUsernameCtx, incorrectUsernameRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "n",
 		"password": "123456789",
 		"email":    "nosiee@example.com",
-	}))
+	}), nil)
 
-	incorrectPasswordCtx, incorrectPasswordRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	incorrectPasswordCtx, incorrectPasswordRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"password": "1234",
 		"email":    "nosiee@example.com",
-	}))
+	}), nil)
 
-	incorrectEmailCtx, incorrectEmailRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	incorrectEmailCtx, incorrectEmailRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"password": "123456789",
 		"email":    "noseie",
-	}))
+	}), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctFormCtx, correctFormRec, true, "CorrectForm"),
@@ -114,20 +114,20 @@ func TestSignUpFormValidate(t *testing.T) {
 }
 
 func TestSignInFormValidate(t *testing.T) {
-	correctFormCtx, correctFormRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	correctFormCtx, correctFormRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"password": "123456789",
-	}))
+	}), nil)
 
-	incorrectUsernameCtx, incorrectUsernameRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	incorrectUsernameCtx, incorrectUsernameRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "n",
 		"password": "123456789",
-	}))
+	}), nil)
 
-	incorrectPasswordCtx, incorrectPasswordRec := testhelpers.CreateContextWithRequest(testhelpers.CreateFormRequest(map[string]string{
+	incorrectPasswordCtx, incorrectPasswordRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
 		"username": "nosiee",
 		"password": "1234",
-	}))
+	}), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctFormCtx, correctFormRec, true, "CorrectForm"),
@@ -150,9 +150,9 @@ func TestIsAuthorized(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	correctTokenCtx, correctTokenRec := testhelpers.CreateContextWithRequest(testhelpers.CreateCookieRequest("jwt", token))
-	incorrectCookieKeyCtx, incorrectCookieKeyRec := testhelpers.CreateContextWithRequest(testhelpers.CreateCookieRequest("test", token))
-	incorrectTokenCtx, incorrectTokenRec := testhelpers.CreateContextWithRequest(testhelpers.CreateCookieRequest("jwt", "definitelynotatoken"))
+	correctTokenCtx, correctTokenRec := testhelpers.CreateContext(testhelpers.CreateCookieRequest("jwt", token), nil)
+	incorrectCookieKeyCtx, incorrectCookieKeyRec := testhelpers.CreateContext(testhelpers.CreateCookieRequest("test", token), nil)
+	incorrectTokenCtx, incorrectTokenRec := testhelpers.CreateContext(testhelpers.CreateCookieRequest("jwt", "definitelynotatoken"), nil)
 
 	testCases := []testhelpers.ContextCase{
 		testhelpers.CreateContextCase(correctTokenCtx, correctTokenRec, true, "CorrectToken"),

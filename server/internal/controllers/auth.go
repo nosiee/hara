@@ -26,7 +26,7 @@ func (c Controllers) SignUp(ctx *gin.Context) {
 	}
 
 	user := models.NewUser(uuid, username, hex.EncodeToString(hash[:]), email)
-	if err := c.UserRepository.Create(user); err != nil {
+	if err := c.UserRepository.Add(user); err != nil {
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})

@@ -15,7 +15,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 	}
 }
 
-func (repo UserRepository) Create(user models.User) error {
+func (repo UserRepository) Add(user models.User) error {
 	_, err := repo.db.Exec("INSERT INTO users(uuid, username, hash, email) VALUES($1, $2, $3, $4)", user.UUID, user.Username, user.Hash, user.Email)
 	return err
 }

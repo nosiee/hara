@@ -6,6 +6,7 @@ import (
 	"hara/internal/api"
 	"hara/internal/config"
 	"hara/internal/controllers"
+	"hara/internal/convert"
 	"hara/internal/repository"
 	"os"
 
@@ -43,8 +44,10 @@ func main() {
 	userRepo := repository.NewUserRepository(db)
 	fileRepo := repository.NewFileRepository(db)
 	apikeyRepo := repository.NewApiKeyRepository(db)
+	converter := convert.NewConverter()
+	converter.Initialize()
 
-	controllers := controllers.NewControllers(userRepo, fileRepo, apikeyRepo)
+	controllers := controllers.NewControllers(userRepo, fileRepo, apikeyRepo, converter)
 
 	go fileRepo.DeleteExpired()
 	go apikeyRepo.UpdateAllQuota()

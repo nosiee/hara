@@ -12,11 +12,22 @@ func NewApiKeyMockRepository() *ApiKeyMockRepository {
 }
 
 func (mock ApiKeyMockRepository) Add(key models.ApiKey) error {
+	if key.OwnerUUID == "errorAdd" {
+		return errors.New("Test error")
+	}
+
 	return nil
 }
 
 func (mock ApiKeyMockRepository) UserHasKey(uuid string) (bool, error) {
-	return false, nil
+	switch uuid {
+	case "has":
+		return true, nil
+	case "errorUserHasKey":
+		return false, errors.New("Test error")
+	default:
+		return false, nil
+	}
 }
 
 func (mock ApiKeyMockRepository) IsExists(key string) (bool, error) {
