@@ -4,7 +4,6 @@ import (
 	"hara/internal/convert"
 	"net/url"
 
-	"fmt"
 	"regexp"
 	"strconv"
 
@@ -22,8 +21,10 @@ const (
 func ImageFileFieldProvided(ctx *gin.Context) {
 	f, err := ctx.FormFile("file")
 	if err != nil {
+		errLogger.Println(err)
+
 		ctx.AbortWithStatusJSON(400, gin.H{
-			"error": fmt.Sprintf("Request cannot be processed. %s", err),
+			"error": err.Error(),
 		})
 		return
 	}
@@ -42,8 +43,10 @@ func ImageFileFieldProvided(ctx *gin.Context) {
 func VideoFileFieldProvided(ctx *gin.Context) {
 	f, err := ctx.FormFile("file")
 	if err != nil {
+		errLogger.Println(err)
+
 		ctx.AbortWithStatusJSON(400, gin.H{
-			"error": fmt.Sprintf("Request cannot be processed. %s", err),
+			"error": err.Error(),
 		})
 		return
 	}

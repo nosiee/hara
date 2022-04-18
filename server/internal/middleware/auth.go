@@ -105,6 +105,8 @@ func IsAuthorized(ctx *gin.Context) {
 	if _, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		return []byte(config.Values.HS512Key), nil
 	}); err != nil {
+		errLogger.Println(err)
+
 		ctx.AbortWithStatusJSON(401, gin.H{
 			"error": err.Error(),
 		})

@@ -17,16 +17,12 @@ func (c Controllers) SignUp(ctx *gin.Context) {
 	email, _ := ctx.GetPostForm("email")
 	uuid := uuid.NewString()
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		ctx.JSON(500, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	user := models.NewUser(uuid, username, hex.EncodeToString(hash[:]), email)
 	if err := c.UserRepository.Add(user); err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -37,6 +33,8 @@ func (c Controllers) SignUp(ctx *gin.Context) {
 
 	token, err := GenerateJWT(uuid, config.Values.HS512Key, exp)
 	if err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -55,6 +53,8 @@ func (c Controllers) SignIn(ctx *gin.Context) {
 
 	user := c.UserRepository.FindByUsername(username)
 	if user == nil {
+		c.InfoLogger.Printf("[%s/%s] incorrect username or password\n", username, password)
+
 		ctx.JSON(401, gin.H{
 			"error": "Username or password is incorrect",
 		})
@@ -63,6 +63,8 @@ func (c Controllers) SignIn(ctx *gin.Context) {
 
 	decodedHash, _ := hex.DecodeString(user.Hash)
 	if err := bcrypt.CompareHashAndPassword(decodedHash, []byte(password)); err != nil {
+		c.InfoLogger.Printf("[%s/%s] incorrect username or password\n", username, password)
+
 		ctx.JSON(401, gin.H{
 			"error": "Username or password is incorrect",
 		})
@@ -73,6 +75,8 @@ func (c Controllers) SignIn(ctx *gin.Context) {
 
 	token, err := GenerateJWT(user.UUID, config.Values.HS512Key, exp)
 	if err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})

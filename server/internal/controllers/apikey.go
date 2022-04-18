@@ -12,6 +12,8 @@ func (c Controllers) GetApiKey(ctx *gin.Context) {
 	token, _ := ctx.Cookie("jwt")
 	id, err := ExtractUserIDFromJWT(token)
 	if err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),
 		})
@@ -20,6 +22,8 @@ func (c Controllers) GetApiKey(ctx *gin.Context) {
 
 	ok, err := c.ApikeyRepository.UserHasKey(id)
 	if err != nil && err != sql.ErrNoRows {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -34,6 +38,8 @@ func (c Controllers) GetApiKey(ctx *gin.Context) {
 	apikey := models.NewApiKey(id, uuid.NewString(), 100, 0, 0)
 
 	if err = c.ApikeyRepository.Add(apikey); err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})

@@ -23,9 +23,10 @@ func (c Controllers) ImageController(ctx *gin.Context) {
 
 	ctx.SaveUploadedFile(file, fpath)
 
-	// TODO: Looks like we need to mock converter
 	ofile, err := c.Converter.ConvertImage(fpath, options)
 	if err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),
 		})
@@ -36,6 +37,8 @@ func (c Controllers) ImageController(ctx *gin.Context) {
 
 	f := models.NewFile(ofile, filepath.Join(config.Values.OutputImagePath, ofile), time.Now().Add(time.Duration(options.Lifetime)*time.Second).Unix())
 	if err = c.FileRepository.Add(f); err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -58,20 +61,15 @@ func (c Controllers) GetImage(ctx *gin.Context) {
 
 	file, err := os.Open(fpath)
 	if err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(404, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	contentType, err := GetFileContentType(file)
-	if err != nil {
-		ctx.JSON(404, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
+	contentType, _ := GetFileContentType(file)
 	ctx.Header("Content-Type", contentType)
 	ctx.File(fpath)
 }
@@ -86,9 +84,10 @@ func (c Controllers) VideoController(ctx *gin.Context) {
 
 	ctx.SaveUploadedFile(file, fpath)
 
-	// TODO: Looks like we need to mock converter
 	ofile, err := c.Converter.ConvertVideo(fpath, options)
 	if err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(400, gin.H{
 			"error": err.Error(),
 		})
@@ -99,6 +98,8 @@ func (c Controllers) VideoController(ctx *gin.Context) {
 
 	f := models.NewFile(ofile, filepath.Join(config.Values.OutputVideoPath, ofile), time.Now().Add(time.Duration(options.Lifetime)*time.Second).Unix())
 	if err = c.FileRepository.Add(f); err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
@@ -121,20 +122,15 @@ func (c Controllers) GetVideo(ctx *gin.Context) {
 
 	file, err := os.Open(fpath)
 	if err != nil {
+		c.ErrLogger.Println(err)
+
 		ctx.JSON(404, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	contentType, err := GetFileContentType(file)
-	if err != nil {
-		ctx.JSON(404, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
+	contentType, _ := GetFileContentType(file)
 	ctx.Header("Content-Type", contentType)
 	ctx.File(fpath)
 }
