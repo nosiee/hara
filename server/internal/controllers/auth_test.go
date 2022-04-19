@@ -8,6 +8,11 @@ import (
 )
 
 func TestSingUp(t *testing.T) {
+	if err := config.LoadFromFile("../../testdata/configs/config_test_correct.toml"); err != nil {
+		t.Fatal(err)
+	}
+
+	hs512Key := config.Values.HS512Key
 	c := NewControllers(repository.NewUserMockRepository(), nil, nil, nil)
 
 	correctCtx, correctRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{
@@ -44,13 +49,11 @@ func TestSingUp(t *testing.T) {
 			tc.CheckCase(t)
 		})
 	}
+
+	config.Values.HS512Key = hs512Key
 }
 
 func TestSignIn(t *testing.T) {
-	if err := config.LoadFromFile("../../testdata/configs/config_test_correct.toml"); err != nil {
-		t.Fatal(err)
-	}
-
 	c := NewControllers(repository.NewUserMockRepository(), nil, nil, nil)
 
 	correctCtx, correctRec := testhelpers.CreateContext(testhelpers.CreateFormRequest(map[string]string{

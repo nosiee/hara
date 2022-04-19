@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"hara/internal/config"
+	"hara/internal/controllers"
 	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
@@ -94,7 +95,7 @@ func SignInFormValidate(ctx *gin.Context) {
 }
 
 func IsAuthorized(ctx *gin.Context) {
-	token, err := ctx.Cookie("jwt")
+	cookie, err := ctx.Cookie("jwt")
 	if err != nil {
 		ctx.AbortWithStatusJSON(401, gin.H{
 			"error": "not authorized",
@@ -102,7 +103,7 @@ func IsAuthorized(ctx *gin.Context) {
 		return
 	}
 
-	if _, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	if _, err := jwt.Parse(cookie, func(t *jwt.Token) (interface{}, error) {
 		return []byte(config.Values.HS512Key), nil
 	}); err != nil {
 		errLogger.Println(err)
@@ -112,4 +113,7 @@ func IsAuthorized(ctx *gin.Context) {
 		})
 		return
 	}
+
+	id, _ := controllers.ExtractUserIDFromJWT(cookie)
+	ctx.Set("uuid", id)
 }

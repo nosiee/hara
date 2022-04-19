@@ -23,8 +23,9 @@ func (serv Server) RunServer(endpoint string) {
 	serv.engine.POST("/api/auth/signup", middleware.SignUpFormProvided, middleware.SignUpFormValidate, serv.controllers.SignUp)
 	serv.engine.POST("/api/auth/signin", middleware.SignInFormProvided, middleware.SignInFormValidate, serv.controllers.SignIn)
 
-	// TODO: /api/key/reset
 	serv.engine.GET("/api/key/get", middleware.IsAuthorized, serv.controllers.GetApiKey)
+	serv.engine.GET("/api/key/reset", middleware.IsAuthorized, serv.controllers.ResetApiKey)
+	serv.engine.GET("/api/key/remind", middleware.IsAuthorized, serv.controllers.RemindApiKey)
 
 	serv.engine.POST("/api/convert/image",
 		middleware.ApiKeyProvided, middleware.ApiKeyValidate(serv.controllers.ApikeyRepository),

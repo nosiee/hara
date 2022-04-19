@@ -10,8 +10,10 @@ type ApiKey struct {
 
 type ApiKeyRepository interface {
 	Add(key ApiKey) error
+	ChangeKeyID(uuid, key string) error
 	UserHasKey(uuid string) (bool, error)
 	IsExists(key string) (bool, error)
+	GetKey(uuid string) (*ApiKey, error)
 	GetQuota(key string) (uint, uint, error)
 	IncrementQuota(key string) error
 	SetUpdatetime(key string, updatetime int64) error

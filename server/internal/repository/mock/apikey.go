@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"hara/internal/models"
 )
 
@@ -19,9 +20,23 @@ func (mock ApiKeyMockRepository) Add(key models.ApiKey) error {
 	return nil
 }
 
+func (mock ApiKeyMockRepository) ChangeKeyID(uuid, key string) error {
+	fmt.Println(uuid)
+	switch uuid {
+	case "errorChangeKeyID":
+		return errors.New("Test error")
+	default:
+		return nil
+	}
+}
+
 func (mock ApiKeyMockRepository) UserHasKey(uuid string) (bool, error) {
 	switch uuid {
 	case "has":
+		return true, nil
+	case "errorChangeKeyID":
+		return true, nil
+	case "errorGetKey":
 		return true, nil
 	case "errorUserHasKey":
 		return false, errors.New("Test error")
@@ -40,6 +55,15 @@ func (mock ApiKeyMockRepository) IsExists(key string) (bool, error) {
 		return false, errors.New("Test error")
 	default:
 		return false, nil
+	}
+}
+
+func (mock ApiKeyMockRepository) GetKey(uuid string) (*models.ApiKey, error) {
+	switch uuid {
+	case "errorGetKey":
+		return nil, errors.New("Test error")
+	default:
+		return &models.ApiKey{}, nil
 	}
 }
 

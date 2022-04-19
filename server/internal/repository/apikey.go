@@ -22,6 +22,11 @@ func (repo ApiKeyRepository) Add(key models.ApiKey) error {
 	return err
 }
 
+func (repo ApiKeyRepository) ChangeKeyID(uuid, key string) error {
+	_, err := repo.db.Exec("UPDATE apikeys SET key = $1 WHERE uuid=$2", key, uuid)
+	return err
+}
+
 func (repo ApiKeyRepository) UserHasKey(uuid string) (bool, error) {
 	var ID int
 	var key string
@@ -35,6 +40,14 @@ func (repo ApiKeyRepository) IsExists(key string) (bool, error) {
 
 	err := repo.db.QueryRow("SELECT id FROM apikeys WHERE key=$1", key).Scan(&ID)
 	return ID != 0, err
+}
+
+func (repo ApiKeyRepository) GetKey(uuid string) (*models.ApiKey, error) {
+	var key models.ApiKey
+	var ID int
+
+	err := repo.db.QueryRow("SELECT * FROM apikeys WHERE uuid=$1", uuid).Scan(&ID, &key.OwnerUUID, &key.Key, &key.MaxQuota, &key.Quota, &key.Updatetime)
+	return &key, err
 }
 
 func (repo ApiKeyRepository) GetQuota(key string) (uint, uint, error) {
