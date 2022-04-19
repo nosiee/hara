@@ -2,10 +2,11 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"hara/internal/models"
 	"os"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type FileRepository struct {
@@ -36,8 +37,8 @@ func (repo FileRepository) DeleteExpired() {
 	for {
 		rows, err := repo.db.Query("SELECT id,fullpath,deletetime FROM files")
 		if err != nil {
-			fmt.Println(err)
-			continue
+			logrus.Fatal(err)
+			break
 		}
 
 		for rows.Next() {

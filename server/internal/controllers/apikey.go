@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 )
 
 func (c Controllers) GetApiKey(ctx *gin.Context) {
@@ -13,13 +14,21 @@ func (c Controllers) GetApiKey(ctx *gin.Context) {
 
 	ok, err := c.ApikeyRepository.UserHasKey(id.(string))
 	if err != nil && err != sql.ErrNoRows {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"uuid":        id,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
 		})
 		return
 	} else if ok {
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"uuid":        id,
+		}).Warn("Already has a key")
+
 		ctx.JSON(400, gin.H{
 			"error": "You already have a key",
 		})
@@ -29,7 +38,10 @@ func (c Controllers) GetApiKey(ctx *gin.Context) {
 	apikey := models.NewApiKey(id.(string), uuid.NewString(), 100, 0, 0)
 
 	if err = c.ApikeyRepository.Add(apikey); err != nil {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"uuid":        id,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -42,6 +54,12 @@ func (c Controllers) GetApiKey(ctx *gin.Context) {
 		"image-url": GenerateAPIUrl(ctx, "image", apikey.Key),
 		"key":       apikey.Key,
 	})
+
+	logrus.WithFields(logrus.Fields{
+		"remote-addr": ctx.Request.RemoteAddr,
+		"uuid":        id,
+		"api-key":     apikey.Key,
+	}).Info("New key has been added")
 }
 
 func (c Controllers) ResetApiKey(ctx *gin.Context) {
@@ -50,7 +68,10 @@ func (c Controllers) ResetApiKey(ctx *gin.Context) {
 
 	ok, err := c.ApikeyRepository.UserHasKey(id.(string))
 	if err != nil && err != sql.ErrNoRows {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"uuid":        id,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -67,7 +88,10 @@ func (c Controllers) ResetApiKey(ctx *gin.Context) {
 	}
 
 	if err != nil {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"uuid":        id,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -80,6 +104,12 @@ func (c Controllers) ResetApiKey(ctx *gin.Context) {
 		"image-url": GenerateAPIUrl(ctx, "image", apikey.Key),
 		"key":       apikey.Key,
 	})
+
+	logrus.WithFields(logrus.Fields{
+		"remote-addr": ctx.Request.RemoteAddr,
+		"uuid":        id,
+		"api-key":     apikey.Key,
+	}).Info("Api key has been reseted")
 }
 
 func (c Controllers) RemindApiKey(ctx *gin.Context) {
@@ -88,7 +118,10 @@ func (c Controllers) RemindApiKey(ctx *gin.Context) {
 
 	ok, err := c.ApikeyRepository.UserHasKey(id.(string))
 	if err != nil && err != sql.ErrNoRows {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"uuid":        id,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -97,6 +130,11 @@ func (c Controllers) RemindApiKey(ctx *gin.Context) {
 	}
 
 	if !ok {
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"uuid":        id,
+		}).Warning("You don't have any key")
+
 		ctx.JSON(400, gin.H{
 			"error": "You don't have any key",
 		})
@@ -105,7 +143,10 @@ func (c Controllers) RemindApiKey(ctx *gin.Context) {
 
 	apikey, err := c.ApikeyRepository.GetKey(id.(string))
 	if err != nil {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"uuid":        id,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -118,4 +159,10 @@ func (c Controllers) RemindApiKey(ctx *gin.Context) {
 		"image-url": GenerateAPIUrl(ctx, "image", apikey.Key),
 		"key":       apikey.Key,
 	})
+
+	logrus.WithFields(logrus.Fields{
+		"remote-addr": ctx.Request.RemoteAddr,
+		"uuid":        id,
+		"api-key":     apikey.Key,
+	}).Info("Reminded about api key")
 }

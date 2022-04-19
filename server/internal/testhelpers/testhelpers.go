@@ -11,10 +11,12 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func init() {
 	gin.SetMode(gin.TestMode)
+	logrus.SetLevel(logrus.PanicLevel)
 }
 
 type ContextCase struct {

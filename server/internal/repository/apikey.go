@@ -2,9 +2,10 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
 	"hara/internal/models"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type ApiKeyRepository struct {
@@ -86,8 +87,8 @@ func (repo ApiKeyRepository) UpdateAllQuota() {
 	for {
 		rows, err := repo.db.Query("SELECT key, updatetime FROM apikeys")
 		if err != nil {
-			fmt.Println(err)
-			continue
+			logrus.Fatal(err)
+			break
 		}
 
 		for rows.Next() {
@@ -96,13 +97,13 @@ func (repo ApiKeyRepository) UpdateAllQuota() {
 			now := time.Now().Unix()
 			if now >= updatetime && updatetime > 0 {
 				if err := repo.SetQuota(key, 0); err != nil {
-					fmt.Println(err)
-					continue
+					logrus.Fatal(err)
+					break
 				}
 
 				if err := repo.SetUpdatetime(key, 0); err != nil {
-					fmt.Println(err)
-					continue
+					logrus.Fatal(err)
+					break
 				}
 			}
 		}

@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -21,7 +22,9 @@ const (
 func ImageFileFieldProvided(ctx *gin.Context) {
 	f, err := ctx.FormFile("file")
 	if err != nil {
-		errLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+		}).Error(err)
 
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": err.Error(),
@@ -31,6 +34,11 @@ func ImageFileFieldProvided(ctx *gin.Context) {
 
 	supportedExt, _ := regexp.Compile(supportedImageExtensions)
 	if !supportedExt.MatchString(f.Filename) {
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"filename":    f.Filename,
+		}).Warning("Unsupported file format")
+
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})
@@ -43,7 +51,9 @@ func ImageFileFieldProvided(ctx *gin.Context) {
 func VideoFileFieldProvided(ctx *gin.Context) {
 	f, err := ctx.FormFile("file")
 	if err != nil {
-		errLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+		}).Error(err)
 
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": err.Error(),
@@ -53,6 +63,11 @@ func VideoFileFieldProvided(ctx *gin.Context) {
 
 	supportedExt, _ := regexp.Compile(supportedVideoExtensions)
 	if !supportedExt.MatchString(f.Filename) {
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"filename":    f.Filename,
+		}).Warning("Unsupported file format")
+
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})
@@ -67,6 +82,11 @@ func SupportedImageFileExtension(ctx *gin.Context) {
 	supportedExt, _ := regexp.Compile(supportedImageExtensions)
 
 	if !supportedExt.MatchString(values.Get("ext")) {
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"ext":         values.Get("ext"),
+		}).Warning("Unsupported file format")
+
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})
@@ -79,6 +99,11 @@ func SupportedVideoFileExtension(ctx *gin.Context) {
 	supportedExt, _ := regexp.Compile(supportedVideoExtensions)
 
 	if !supportedExt.MatchString(values.Get("ext")) {
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"ext":         values.Get("ext"),
+		}).Warning("Unsupported file format")
+
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Unsupported file format",
 		})
@@ -91,6 +116,11 @@ func ValidateLifetime(ctx *gin.Context) {
 	lifetime, err := strconv.ParseUint(values.Get("lifetime"), 10, 64)
 
 	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"lifetime":    values.Get("lifetime"),
+		}).Warning("Lifetime parameter should be uint in seconds")
+
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Lifetime parameter should be uint in seconds",
 		})
@@ -98,6 +128,11 @@ func ValidateLifetime(ctx *gin.Context) {
 	}
 
 	if lifetime < hourInSeconds || lifetime > monthInSeconds {
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+			"lifetime":    values.Get("lifetime"),
+		}).Warning("Lifetime parameter should be uint in seconds")
+
 		ctx.AbortWithStatusJSON(400, gin.H{
 			"error": "Lifetime should be more than an hour, and less than a month",
 		})

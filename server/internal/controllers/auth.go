@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,7 +22,9 @@ func (c Controllers) SignUp(ctx *gin.Context) {
 
 	user := models.NewUser(uuid, username, hex.EncodeToString(hash[:]), email)
 	if err := c.UserRepository.Add(user); err != nil {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -33,7 +36,9 @@ func (c Controllers) SignUp(ctx *gin.Context) {
 
 	token, err := GenerateJWT(uuid, config.Values.HS512Key, exp)
 	if err != nil {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -45,6 +50,12 @@ func (c Controllers) SignUp(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"message": "ok",
 	})
+
+	logrus.WithFields(logrus.Fields{
+		"remote-addr": ctx.Request.RemoteAddr,
+		"username":    user.Username,
+		"uuid":        user.UUID,
+	}).Info("New user has been added")
 }
 
 func (c Controllers) SignIn(ctx *gin.Context) {
@@ -53,7 +64,9 @@ func (c Controllers) SignIn(ctx *gin.Context) {
 
 	user := c.UserRepository.FindByUsername(username)
 	if user == nil {
-		c.InfoLogger.Printf("[%s/%s] incorrect username or password\n", username, password)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+		}).Warn("Incorrect username or password")
 
 		ctx.JSON(401, gin.H{
 			"error": "Username or password is incorrect",
@@ -63,7 +76,9 @@ func (c Controllers) SignIn(ctx *gin.Context) {
 
 	decodedHash, _ := hex.DecodeString(user.Hash)
 	if err := bcrypt.CompareHashAndPassword(decodedHash, []byte(password)); err != nil {
-		c.InfoLogger.Printf("[%s/%s] incorrect username or password\n", username, password)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+		}).Warn("Incorrect username or password")
 
 		ctx.JSON(401, gin.H{
 			"error": "Username or password is incorrect",
@@ -75,7 +90,9 @@ func (c Controllers) SignIn(ctx *gin.Context) {
 
 	token, err := GenerateJWT(user.UUID, config.Values.HS512Key, exp)
 	if err != nil {
-		c.ErrLogger.Println(err)
+		logrus.WithFields(logrus.Fields{
+			"remote-addr": ctx.Request.RemoteAddr,
+		}).Error(err)
 
 		ctx.JSON(500, gin.H{
 			"error": err.Error(),
@@ -87,4 +104,10 @@ func (c Controllers) SignIn(ctx *gin.Context) {
 	ctx.JSON(200, gin.H{
 		"message": "ok",
 	})
+
+	logrus.WithFields(logrus.Fields{
+		"remote-addr": ctx.Request.RemoteAddr,
+		"username":    user.Username,
+		"uuid":        user.UUID,
+	}).Info("Successful authorized")
 }

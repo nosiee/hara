@@ -10,6 +10,8 @@ import (
 	"hara/internal/repository"
 	"os"
 
+	"github.com/sirupsen/logrus"
+
 	_ "github.com/lib/pq"
 )
 
@@ -21,6 +23,9 @@ func main() {
 	flag.BoolVar(&help, "help", false, "Print help information")
 	flag.Parse()
 
+	logrus.SetReportCaller(true)
+	logrus.SetLevel(logrus.TraceLevel)
+
 	if help {
 		flag.Usage()
 		os.Exit(1)
@@ -28,17 +33,21 @@ func main() {
 
 	if len(os.Args) == 1 {
 		if err := config.LoadFromEnv(); err != nil {
-			panic(err)
+			logrus.Panic(err)
 		}
 	} else {
 		if err := config.LoadFromFile(file); err != nil {
-			panic(err)
+			logrus.Panic(err)
 		}
 	}
 
 	db, err := sql.Open("postgres", config.Values.DatabaseURL)
 	if err != nil {
-		panic(err)
+		logrus.Panic(err)
+	}
+
+	if err := db.Ping(); err != nil {
+		logrus.Panic(err)
 	}
 
 	userRepo := repository.NewUserRepository(db)
