@@ -14,6 +14,7 @@ func TestLoadFromEnv(t *testing.T) {
 	correctEnvs["OUTPUT_IMAGE_PATH"] = "output/images"
 	correctEnvs["OUTPUT_VIDEO_PATH"] = "output/videos"
 	correctEnvs["DATABASE_URL"] = "postgresql://localhost/mydb?user=other&password=secret"
+	correctEnvs["DATABASE_DRIVER"] = "postgres"
 
 	incorrectEnvs := make(map[string]string, 1)
 	incorrectEnvs["API_ENDPOINT"] = ":8080"

@@ -1,0 +1,30 @@
+version: "3.9"
+services:
+  db:
+    image: "postgres:alpine"
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=nosiee
+      - POSTGRES_PASSWORD=nosiee
+      - POSTGRES_DB=hara
+    ports:
+      - "5432:5432"
+  hara:
+    build: .
+    environment:
+      - API_ENDPOINT=:8080
+      - HS512_KEY="NdRgUkXp2s5v8y/B?E(H+MbQeShVmYq3t6w9z$C&F)J@NcRfUjWnZr4u7x!A%D*G"
+
+      - DATABASE_URL=postgres://nosiee:nosiee@postgres:5432/hara?sslmode=disable
+      - DATABASE_DRIVER=postgres
+
+      - UPLOAD_IMAGE_PATH=upload/images
+      - UPLOAD_VIDEO_PATH=upload/videos
+      - OUTPUT_IMAGE_PATH=output/images
+      - OUTPUT_VIDEO_PATH=output/videos
+      - GIN_MODE=release
+    command: bash -c "bin/migrations --mtype up --mpath migrations/ && bin/hara"
+    ports: 
+      - "8080:8080"
+    depends_on:
+      - db
