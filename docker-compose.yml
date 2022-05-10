@@ -9,6 +9,8 @@ services:
       - POSTGRES_DB=hara
     ports:
       - "5432:5432"
+    volumes:
+      - dbdata:/var/lib/postgresql/data
   hara:
     build: .
     environment:
@@ -18,13 +20,21 @@ services:
       - DATABASE_URL=postgres://nosiee:nosiee@postgres:5432/hara?sslmode=disable
       - DATABASE_DRIVER=postgres
 
-      - UPLOAD_IMAGE_PATH=upload/images
-      - UPLOAD_VIDEO_PATH=upload/videos
-      - OUTPUT_IMAGE_PATH=output/images
-      - OUTPUT_VIDEO_PATH=output/videos
+      - UPLOAD_IMAGE_PATH=${UPLOAD_PATH}/images
+      - UPLOAD_VIDEO_PATH=${UPLOAD_PATH}/videos
+
+      - OUTPUT_IMAGE_PATH=${OUTPUT_PATH}/images
+      - OUTPUT_VIDEO_PATH=${OUTPUT_PATH}/videos
+
       - GIN_MODE=release
     command: bash -c "bin/migrations --mtype up --mpath migrations/ && bin/hara"
     ports: 
       - "8080:8080"
     depends_on:
       - db
+    volumes:
+      - haradata:${OUTPUT_PATH}
+
+volumes:
+  dbdata:
+  haradata:
